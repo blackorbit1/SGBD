@@ -18,7 +18,10 @@ public class DBManager {
 	public void init() {
 		dbDef = DBDef.getInstance();
 	}
-	
+	/**
+	 * fonction qui execute la commande
+	 * @param commande
+	 */
 	public void processCommand(String commande) {
 		StringTokenizer st = new StringTokenizer(commande);
 		String action = st.nextToken();
@@ -61,7 +64,7 @@ public class DBManager {
 	 * 
 	 * @param nomRelation (nom de la relation)
 	 * @param nombreColonnes (le nombre de colonnes)
-	 * @param typesDesColonnes (un tableaui avec le types de chaque colonnes)
+	 * @param typesDesColonnes (un tableau avec le type de chaque colonne)
 	 */
 	public void createRelation (String nomRelation, int nombreColonnes, ArrayList<String >typesDesColonnes) {
 		RelDef relation = new RelDef();
