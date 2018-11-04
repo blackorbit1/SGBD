@@ -4,39 +4,31 @@ import java.util.Scanner;
 
 import exception.ReqException;
 
-/**
- * Point d'entrée
- * 
- */
 public class Main {
-	public static void main(String[] args) {
+	public static void main(String [] args) {
 		DBManager db = DBManager.getInstance();
 		db.init();
 		String commande = "";
 		do {
-
+			
 			try {
 				System.out.println("Veuillez entrer votre commande");
 				Scanner sc = new Scanner(System.in);
 				commande = sc.nextLine();
-				// sc.close();
-
+				//sc.close();
+				
 				switch (commande) {
-				case "exit":
-					db.finish();
-					break;
-				default:
-					db.processCommand(commande);
-					break;
+					case "exit": db.finish(); break;
+					default: db.processCommand(commande); break;
 				}
 				db.afficher();
-			} catch (ReqException e) {
+			} catch(ReqException e) {
 				System.out.println(e.getMessage());
-			} catch (Exception e) {
+			} catch(Exception e) {
 				System.out.println("bonjour");
 			}
-
-		} while (!commande.equals("exit"));
+			
+		} while(!commande.equals("exit"));
 	}
-
+	
 }
