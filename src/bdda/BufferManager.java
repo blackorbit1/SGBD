@@ -26,7 +26,7 @@ public class BufferManager {
 	 * @param iPageId l'ID de la page en question
 	 * @param iIsDirty TRUE pour changé FALSE pour inchangé
 	 */
-	public void freePage(PageID iPageId, boolean iIsDirty){
+	public void freePage(PageId iPageId, boolean iIsDirty){
 
 	}
 
