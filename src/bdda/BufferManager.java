@@ -1,8 +1,11 @@
 package bdda;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class BufferManager {
+    private ArrayList<Frame> frames = new ArrayList<>();
+
 	//Pour avoir une unique instance de BufferManager
 	private static final BufferManager instance = new BufferManager();
 	private BufferManager() {}
@@ -18,7 +21,8 @@ public class BufferManager {
 	 *
 	 * @return un des buffer qui stockent le contenu de la page
 	 */
-	public ByteBuffer getPage(int iPageId) {// vérifier si la page est déjà chargée
+	public ByteBuffer getPage(PageId iPageId) {// vérifier si la page est déjà chargée
+        for(int i = 0; i<frames.size();)
 		return();
 	}
 
@@ -26,7 +30,7 @@ public class BufferManager {
 	 * @param iPageId l'ID de la page en question
 	 * @param iIsDirty TRUE pour changé FALSE pour inchangé
 	 */
-	public void freePage(PageID iPageId, boolean iIsDirty){
+	public void freePage(PageId iPageId, boolean iIsDirty){
 
 	}
 

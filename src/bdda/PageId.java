@@ -1,7 +1,6 @@
 package bdda;
 
 public class PageId {
-
 	private int FileIdx;
 	private int PageIdx;
 
@@ -20,5 +19,4 @@ public class PageId {
 	public void setPageIdx(int pageIdx) {
 		PageIdx = pageIdx;
 	}
-
 }
