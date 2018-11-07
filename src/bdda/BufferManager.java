@@ -22,8 +22,15 @@ public class BufferManager {
 	 * @return un des buffer qui stockent le contenu de la page
 	 */
 	public ByteBuffer getPage(PageId iPageId) {// vérifier si la page est déjà chargée
-        for(int i = 0; i<frames.size();)
-		return();
+	    ByteBuffer bf = ByteBuffer.allocateDirect(Constantes.pageSize);
+        String chaine;
+        for(int i = 0; i<frames.size();i++){
+            if(frames.get(i).getPageIdx() == iPageId.getPageIdx()){
+                int dirty = frames.get(i).isDirty()?1:0;
+                chaine += "///frame@pid=" + frames.get(i).getPageIdx() + "@d=" + dirty + "@pc=" + frames.get(i).getPin_count();
+            }
+        }
+		return(bf.put(chaine));
 	}
 
 	/** Libérer une page
