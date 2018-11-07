@@ -15,6 +15,10 @@ public class DBDef {
 		return dbdef;
 	}
 	
+	/** Pour ajouter une relation
+	 * 
+	 * @param relation (la relation à ajouter)
+	 */
 	public void addRelation(RelDef relation) {
 		listeDeRelDef.add(relation);
 		compteurRel++;
@@ -24,6 +28,7 @@ public class DBDef {
 		return listeDeRelDef;
 	}
 
+	
 	public void setListeDeRelDef(ArrayList<RelDef> listeDeRelDef) {
 		this.listeDeRelDef = listeDeRelDef;
 	}
