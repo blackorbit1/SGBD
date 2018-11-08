@@ -40,9 +40,16 @@ public class DiskManager {
 	 */
 	public void addPage(int iFileIdx, PageId oPageId) throws IOException {
 		// ajouter la page
-		try (RandomAccessFile rf = new RandomAccessFile(Constantes.pathName + oPageId.getPageIdx() + ".rf", "r")) {
-			//data = ByteBuffer.allocateDirect(Constantes.pageSize);
+		try (RandomAccessFile rf = new RandomAccessFile(Constantes.pathName + iFileIdx + ".rf", "r")) {
 			byte[] tab = new byte[Constantes.pageSize];
+			//On a la taille entiere de la page en bytes avec length
+			//On sait que une page vaut 4ko donc on divise le tout par 4ko et on trouve le nombre de page
+			//Exemple si ya que 3 pages de 4ko alors faut ecrire la nouvelle page a la position 3
+			//Autre exemple si dans la page y'a rien on a 0/4ko => 0 donc on met direct la nouvelle page 
+			//a la postion 0
+			long position = (rf.length()/Constantes.pageSize);
+			//seek permet de connaitre la derniere position du fichier
+			rf.seek(position);
 			for (Byte b : tab) {
 				rf.writeByte(0);
 			}
@@ -50,6 +57,7 @@ public class DiskManager {
 		// Postionner à la fin de la dernière page
 		// rf.seek(pos);
 		// rf.write(data.wrap(tab).getInt());
+		//On indique a PageId dans quel fichier on ajoute la nouvelle page
 		oPageId.setFileIdx(iFileIdx);
 	}
 
@@ -60,7 +68,7 @@ public class DiskManager {
 	 * @throws FileNotFoundException
 	 */
 	public void readPage(PageId iPageId, ByteBuffer iBuffer) throws FileNotFoundException {
-		RandomAccessFile readFile = new RandomAccessFile(Constantes.pathName + iPageId.getPageIdx() + ".rf", "r");
+		RandomAccessFile readFile = new RandomAccessFile(Constantes.pathName + iPageId.getFileIdx() + ".rf", "r");
 
 	}
 
@@ -68,10 +76,10 @@ public class DiskManager {
 	 * Permet d'ecrire sur dans une page (output)
 	 * @param iPageId
 	 * @param oBuffer
-	 * @throws FileNotFoundException
+	 * @throws IOException 
 	 */
-	public void writePage(PageId iPageId, ByteBuffer oBuffer) throws FileNotFoundException {
-		RandomAccessFile writeFile = new RandomAccessFile(Constantes.pathName + iPageId.getPageIdx() + ".rf", "w");
-
+	public void writePage(PageId iPageId, ByteBuffer oBuffer) throws IOException {
+		//On recupere le fichier qui contient la page qu'on veut modifier
+		RandomAccessFile writeFile = new RandomAccessFile(Constantes.pathName + iPageId.getFileIdx() + ".rf", "w");
 	}
 }
