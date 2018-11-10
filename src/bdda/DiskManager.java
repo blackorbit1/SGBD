@@ -1,16 +1,12 @@
 package bdda;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import exception.ReqException;
-import sun.font.CreatedFontTracker;
 
 public class DiskManager {
 
