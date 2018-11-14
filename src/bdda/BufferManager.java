@@ -49,7 +49,19 @@ public class BufferManager {
         /* Si elle l'est pas, on vérifie qu'il reste de la place pour la mettre en mémoire si oui c'est bon
          * sinon on applique la politique de remplacement, on l'ajoute en mémoire et on la retourne.
          */
-        if(frames.size() < Constantes.frameCount){ // Il reste de la place
+
+        // On regarde si il reste de la place
+        int indexPlace = 0;
+        boolean isPlein = true;
+
+        for(int i = 0; i<frames.size(); i++){
+            if(frames.get(i).getContent() == null){
+                indexPlace = i;
+                isPlein = false;
+            }
+        }
+
+        if(!isPlein){ // Si il reste de la place
             // On crée une instance de frame qui va contenir notre page
             Frame page = new Frame(iPageId);
 
@@ -68,8 +80,8 @@ public class BufferManager {
             page.setContent(bf);
 
             // On une référence à notre nouvelle frame dans le tableau des frames
-            frames.add(page);
-        } else if(frames.size() == Constantes.frameCount){ // Il n'y a plus de places
+            frames.set(indexPlace, page);
+        } else {
             int indexOldestDate = 0; // l'index de la frame dont le pin count est passé à 0 le moins recemment
             Date oldestDate = new Date(); // la date de la frame dont le pin count est passé à 0 le moins recemment
 
@@ -78,7 +90,6 @@ public class BufferManager {
                 if(frames.get(i).getUnpinned().getTime() < oldestDate.getTime()){
                     indexOldestDate = i;
                     oldestDate = frames.get(i).getUnpinned();
-
                     // On enregistre les modifications faites à la page associée à la frame qu'on va utiliser pour notre nouvelle page
                     freeFrame(i, frames.get(i).isDirty());
                 }
@@ -95,10 +106,7 @@ public class BufferManager {
                 e.printStackTrace();
                 throw new SGBDException("Erreur d'I/O dans la méthode .readPage() de DiskManager");
             }
-        } else {
-            throw new SGBDException("Le tableau des frames a plus de frames que le maximum autorisé");
         }
-
         return null;
     }
 
