@@ -12,7 +12,16 @@ public class BufferManager {
 
     //Pour avoir une unique instance de BufferManager
     private static final BufferManager instance = new BufferManager();
-    private BufferManager() {}
+
+    /** Constructeur de ctte classe qui crée un tableau de frames
+     */
+    private BufferManager() {
+        this.frames = new ArrayList<Frame>();
+        for(int i = 0; i<Constantes.frameCount; i++){
+            this.frames.add(new Frame(null));
+        }
+    }
+
     public static BufferManager getInstance() {
         return instance;
     }
@@ -71,7 +80,7 @@ public class BufferManager {
                     oldestDate = frames.get(i).getUnpinned();
 
                     // On enregistre les modifications faites à la page associée à la frame qu'on va utiliser pour notre nouvelle page
-                    freePage(i, frames.get(i).isDirty());
+                    freeFrame(i, frames.get(i).isDirty());
                 }
             }
 
@@ -97,9 +106,8 @@ public class BufferManager {
      * @param indexFrame l'index de la frame qui contient la page à virer
      * @param iIsDirty TRUE pour changé FALSE pour inchangé
      */
-    public void freePage(int indexFrame, boolean iIsDirty) throws SGBDException {
+    public void freeFrame(int indexFrame, boolean iIsDirty) throws SGBDException {
         if(iIsDirty){
-            // TODO ==> Il manque une méthode .writePage() ou .savePage() dans le DiskManager
             try {
                 DiskManager.getInstance().writePage(frames.get(indexFrame).getPageId(), frames.get(indexFrame).getContent());
             } catch (IOException e) {
@@ -108,19 +116,33 @@ public class BufferManager {
             }
         }
         frames.get(indexFrame).setPin_count(0);
-        frames.get(indexFrame).setPageId(new PageId()/* TODO qu'est ce qu'on met ? */);
+        frames.get(indexFrame).setPageId(null);
         frames.get(indexFrame).setContent(ByteBuffer.allocateDirect(Constantes.pageSize));
         frames.get(indexFrame).setDirty(false);
-
-
-
     }
 
     /** Libérer toutes les pages du tableau de frames
      */
     public void flushAll() throws SGBDException {
         for (int i = 0; i<frames.size(); i++){
-            freePage(i, frames.get(i).isDirty());
+            freePage(frames.get(i).getPageId(), frames.get(i).isDirty());
+        }
+    }
+
+    /** Libérer une page
+     * @param pageId l'index de la frame qui contient la page à virer
+     * @param iIsDirty TRUE pour changé FALSE pour inchangé
+     */
+    public void freePage(PageId pageId, boolean iIsDirty) throws SGBDException {
+        for(int i = 0; i<frames.size(); i++){
+            if(frames.get(i).getPageId().getPageIdx() == pageId.getPageIdx()) {
+                if (frames.get(i).getPin_count() > 0) {
+                    frames.get(i).setPin_count(frames.get(i).getPin_count() - 1);
+                } else {
+                    frames.get(i).setPin_count(0);
+                }
+                frames.get(i).setDirty(true);
+            }
         }
     }
 }
