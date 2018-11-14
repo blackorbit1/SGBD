@@ -8,7 +8,7 @@ public class RelDef {
 	private ArrayList<String> type;
 	private int recordSize;
 	private int slotCount;
-	
+
 	private static int compteurDeRelDef = 0;
 
 	public RelDef() {
@@ -39,6 +39,22 @@ public class RelDef {
 
 	public void setType(ArrayList<String> type) {
 		this.type = type;
+	}
+
+	public int getRecordSize() {
+		return recordSize;
+	}
+
+	public void setRecordSize(int recordSize) {
+		this.recordSize = recordSize;
+	}
+
+	public int getSlotCount() {
+		return slotCount;
+	}
+
+	public void setSlotCount(int slotCount) {
+		this.slotCount = slotCount;
 	}
 
 }
