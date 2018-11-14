@@ -106,7 +106,7 @@ public class BufferManager {
      * @param indexFrame l'index de la frame qui contient la page à virer
      * @param iIsDirty TRUE pour changé FALSE pour inchangé
      */
-    public void freeFrame(int indexFrame, boolean iIsDirty) throws SGBDException {
+    private void freeFrame(int indexFrame, boolean iIsDirty) throws SGBDException {
         if(iIsDirty){
             try {
                 DiskManager.getInstance().writePage(frames.get(indexFrame).getPageId(), frames.get(indexFrame).getContent());
@@ -136,11 +136,10 @@ public class BufferManager {
     public void freePage(PageId pageId, boolean iIsDirty) throws SGBDException {
         for(int i = 0; i<frames.size(); i++){
             if(frames.get(i).getPageId().getPageIdx() == pageId.getPageIdx()) {
-                if (frames.get(i).getPin_count() > 0) {
+                if (frames.get(i).getPin_count() > 0) { // Si pin_count est supérieur à 0, on le décrémente
                     frames.get(i).setPin_count(frames.get(i).getPin_count() - 1);
-                } else {
-                    frames.get(i).setPin_count(0);
                 }
+                // On déclare la page comme ayant été potentiellement changée
                 frames.get(i).setDirty(true);
             }
         }
