@@ -6,6 +6,8 @@ public class RelDef {
 	private String nom;
 	private int nbColonne;
 	private ArrayList<String> type;
+	private int recordSize;
+	private int slotCount;
 	
 	private static int compteurDeRelDef = 0;
 
