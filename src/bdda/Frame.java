@@ -1,18 +1,25 @@
 package bdda;
 
+import java.nio.ByteBuffer;
+import java.util.Date;
+
 public class Frame {
-    private int pageIdx;
+    private PageId pageId;
     private boolean dirty;
     private int pin_count;
+    private Date unpinned; // la date à laquelle pin_count est passé à 0 (LRU)
+    private ByteBuffer content; // contenu de la frame (du cadre qui contient la page)
 
     public Frame(PageId pageid){
-        this.pageIdx = pageid.getPageIdx();
+        this.pageId = pageid;
+        this.dirty = false;
+        this.pin_count = 1; // Car si on vient de la creer, y a forcément 1 personne qui travaille dessus
     }
 
     // Getter
 
-    public int getPageIdx() {
-        return pageIdx;
+    public PageId getPageId() {
+        return pageId;
     }
 
     public boolean isDirty() {
@@ -23,10 +30,14 @@ public class Frame {
         return pin_count;
     }
 
+    public ByteBuffer getContent() { return content; }
+
+    public Date getUnpinned() { return unpinned; }
+
     // Setter
 
-    public void setPageIdx(int pageIdx) {
-        this.pageIdx = pageIdx;
+    public void setPageId(PageId pageId) {
+        this.pageId = pageId;
     }
 
     public void setDirty(boolean dirty) {
@@ -35,5 +46,10 @@ public class Frame {
 
     public void setPin_count(int pin_count) {
         this.pin_count = pin_count;
+        if(pin_count == 0){
+            unpinned = new Date();
+        }
     }
+
+    public void setContent(ByteBuffer content) { this.content = content; }
 }
