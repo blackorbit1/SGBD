@@ -52,12 +52,15 @@ public class DiskManager {
 		// ajouter la page
 		try (RandomAccessFile rf = new RandomAccessFile(Constantes.pathName + "Data_" + iFileIdx + ".rf", "rw")) {
 			byte[] tab = new byte[Constantes.pageSize];
+			for (Byte b : tab) {
+				b = 0;
+			}
 
 			ByteBuffer bf = ByteBuffer.wrap(tab);
 			// On stocke le numero de la page dans le buffer ( les 4 premiers octets de la
 			// page)
 
-			bf.putInt(0, oPageId.getPageIdx());
+			// bf.putInt(0, oPageId.getPageIdx());
 			// On a la taille entiere de la page en bytes avec length
 			// On sait que une page vaut 4ko donc on divise le tout par 4ko et on trouve le
 			// nombre de page
@@ -66,19 +69,18 @@ public class DiskManager {
 			// Autre exemple si dans la page y'a rien on a 0/4ko => 0 donc on met direct la
 			// nouvelle page
 			// a la postion 0
-			// long position = (rf.length() / Constantes.pageSize);
+			// long position = ((rf.length() / Constantes.pageSize);
 
 			// seek permet de connaitre la derniere position du fichier
 			rf.seek(rf.length());
 
 			// On écrit le contenu du buffer
 			rf.write(bf.array());
+
+			oPageId.setFileIdx(iFileIdx);
+			oPageId.setPageIdx((int) (rf.length() / Constantes.pageSize));
 		}
-		// Postionner à la fin de la dernière page
-		// rf.seek(pos);
-		// rf.write(data.wrap(tab).getInt());
-		// On indique a PageId dans quel fichier on ajoute la nouvelle page
-		oPageId.setFileIdx(iFileIdx);
+
 	}
 
 	/**
@@ -88,33 +90,14 @@ public class DiskManager {
 	 * @param oBuffer
 	 * @throws IOException
 	 */
-	public ByteBuffer readPage(PageId iPageId, ByteBuffer iBuffer) throws IOException {
+	public void readPage(PageId iPageId, ByteBuffer iBuffer) throws IOException {
 		try (RandomAccessFile readFile = new RandomAccessFile(
 				Constantes.pathName + "Data_" + iPageId.getFileIdx() + ".rf", "r")) {
 
 			FileChannel fc = readFile.getChannel();
-			long position = 0;
-			readFile.seek(position);
-
-			// Tant qu'on a pas atteint la fin du fichier
-			while (!(readFile.length() == position)) {
-				// Si le numéro de la page( entier sur 4 octects) correspond à la page recherché
-				// On remplit le buffer avec le contenu de la page
-
-				int num = readFile.readInt();
-				if (num == iPageId.getPageIdx()) {
-					// Optimisation retirer les 4 premiers octects car inutile
-					fc.position(position);
-					fc.read(iBuffer);
-					return iBuffer;
-
-				}
-				// Prochaine page
-				readFile.seek(position += Constantes.pageSize);
-				System.out.println(position);
-
-			}
-			return null; // Si on a pas réussi à lire la page
+			long position = iPageId.getPageIdx() * Constantes.pageSize;
+			fc.position(position);
+			fc.read(iBuffer);
 		}
 
 	}
@@ -128,51 +111,28 @@ public class DiskManager {
 	 */
 	public void writePage(PageId iPageId, ByteBuffer oBuffer) throws IOException {
 		// On recupere le fichier qui contient la page qu'on veut modifier
-		RandomAccessFile writeFile = new RandomAccessFile(Constantes.pathName + iPageId.getFileIdx() + ".rf", "w");
+
+		try (RandomAccessFile writeFile = new RandomAccessFile(Constantes.pathName + iPageId.getFileIdx() + ".rf",
+				"w")) {
+
+			FileChannel fc = writeFile.getChannel();
+			long position = iPageId.getPageIdx() * Constantes.pageSize;
+			fc.position(position);
+			fc.write(oBuffer);
+		}
 	}
 
 	public static void main(String[] args) throws IOException, ReqException {
 		DiskManager dm = DiskManager.getInstance();
 		dm.createFile(2);
+		
 		PageId pid = new PageId();
 		PageId pid2 = new PageId();
 		PageId pid3 = new PageId();
 
-		pid.setPageIdx(1);
-		pid2.setPageIdx(2);
-		pid3.setPageIdx(3);
-
 		dm.addPage(2, pid);
 		dm.addPage(2, pid2);
 		dm.addPage(2, pid3);
-
-		ByteBuffer bf = ByteBuffer.allocate(Constantes.pageSize);
-
-		// test1
-
-		// on lit la page avec l'id 1
-		bf = dm.readPage(pid, bf);
-		// on récupère le pageid qui est stocker dans le prem
-		int n = bf.getInt(0);
-		if (n == pid.getPageIdx()) {
-			System.out.println("ok: " + n + " = " + pid.getPageIdx());
-		}
-
-		// test2
-		bf.position(0);
-		bf = dm.readPage(pid3, bf);
-		n = bf.getInt(0);
-		if (n == pid3.getPageIdx()) {
-			System.out.println("ok: " + n + " = " + pid3.getPageIdx());
-		}
-
-		// test3
-		bf.position(0);
-		bf = dm.readPage(pid2, bf);
-		n = bf.getInt(0);
-		if (n == pid2.getPageIdx()) {
-			System.out.println("ok: " + n + " = " + pid2.getPageIdx());
-		}
 
 	}
 }
