@@ -98,7 +98,6 @@ public class DiskManager {
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
 			fc.read(iBuffer);
-			fc.close();
 		}
 
 	}
@@ -120,8 +119,20 @@ public class DiskManager {
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
 			fc.write(oBuffer);
-			fc.close();
 		}
 	}
 
+	public static void main(String[] args) throws IOException, ReqException {
+		DiskManager dm = DiskManager.getInstance();
+		dm.createFile(2);
+		
+		PageId pid = new PageId();
+		PageId pid2 = new PageId();
+		PageId pid3 = new PageId();
+
+		dm.addPage(2, pid);
+		dm.addPage(2, pid2);
+		dm.addPage(2, pid3);
+
+	}
 }
