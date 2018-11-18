@@ -30,8 +30,8 @@ public class HeaderPageInfo {
 	}
 
 	public void readFromBuffer(ByteBuffer buffer) {
+		buffer.position(0);
 		this.dataPageCount = buffer.getInt();
-
 		for (int i = 0; i < this.dataPageCount; i++) {
 			int Idx_page_données = buffer.getInt();
 			int NbSlotsRestantDisponiblesSurLaPage = buffer.getInt();
@@ -41,6 +41,7 @@ public class HeaderPageInfo {
 	}
 
 	public void writeToBuffer(ByteBuffer buffer) {
+		buffer.position(0);
 		buffer.putInt(dataPageCount);
 
 		for (DataPage d : listePages) {
