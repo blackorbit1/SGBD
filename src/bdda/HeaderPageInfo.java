@@ -29,6 +29,12 @@ public class HeaderPageInfo {
 		this.listePages = new ArrayList<>();
 	}
 
+	/**
+	 * Lit le buffer correspondant à la headerPage et remplit les attributs
+	 * d'instance
+	 * 
+	 * @param buffer remplit avec le contenu de la header Page ( page d'id 0 )
+	 */
 	public void readFromBuffer(ByteBuffer buffer) {
 		buffer.position(0);
 		this.dataPageCount = buffer.getInt();
@@ -39,6 +45,12 @@ public class HeaderPageInfo {
 		}
 
 	}
+
+	/**
+	 * Ecrit le contenu d'une instance de headerPage dans un buffer
+	 * 
+	 * @param buffer vide
+	 */
 
 	public void writeToBuffer(ByteBuffer buffer) {
 		buffer.position(0);
