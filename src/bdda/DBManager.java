@@ -85,11 +85,45 @@ public class DBManager {
 	 * @param nombreColonnes (le nombre de colonnes)
 	 * @param typesDesColonnes (un tableau avec le types de chaque colonnes)
 	 */
-	public void createRelation (String nomRelation, int nombreColonnes, ArrayList<String >typesDesColonnes) {
+	public void createRelation (String nomRelation, int nombreColonnes, ArrayList<String>typesDesColonnes) throws ReqException {
+
+
+		int recordSize = 0;
+		for(int i = 0; i<typesDesColonnes.size(); i++){
+			switch(typesDesColonnes.get(i)){
+				case "int":
+					recordSize += Constantes.recordSize_int;
+					break;
+				case "float":
+					recordSize += Constantes.recordSize_float;
+					break;
+				default:
+					if(typesDesColonnes.get(i).substring(0, 5).equals("string")){
+						try{
+							int x = Integer.parseInt(typesDesColonnes.get(i).substring(6));
+							if(x <= 1000 && x>0){
+								recordSize += x * Constantes.recordSize_stringx;
+							} else {
+								throw new ReqException("La taille d'une colonne de type string est incorrecte (min: 1, max: 1000)");
+							}
+						} catch (Exception e){
+							throw new ReqException("Une colonne de type string est mal déclarée");
+						}
+					}
+			}
+		}
+		if(Constantes.pageSize / recordSize == 0){
+			throw new ReqException("La relation que vous tentez de creer prend trop de place par rapport à la taille max d'une page");
+		}
+
 		RelDef relation = new RelDef();
 		relation.setNom(nomRelation);
 		relation.setNbColonne(nombreColonnes);
 		relation.setType(typesDesColonnes);
+		relation.setRecordSize(recordSize);
+		relation.setSlotCount(Constantes.pageSize / recordSize);
+		relation.setFileIdx(dbDef.getCompteurRel());
+
 		dbDef.addRelation(relation);
 	}
 }

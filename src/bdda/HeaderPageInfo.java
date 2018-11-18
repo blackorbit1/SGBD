@@ -30,7 +30,7 @@ public class HeaderPageInfo {
 	}
 
 	/**
-	 * Lit le buffer correspondant à la headerPage et remplit les attributs
+	 * Lit le buffer correspondant ï¿½ la headerPage et remplit les attributs
 	 * d'instance
 	 * 
 	 * @param buffer remplit avec le contenu de la header Page ( page d'id 0 )
@@ -39,9 +39,9 @@ public class HeaderPageInfo {
 		buffer.position(0);
 		this.dataPageCount = buffer.getInt();
 		for (int i = 0; i < this.dataPageCount; i++) {
-			int Idx_page_données = buffer.getInt();
+			int Idx_page_donnees = buffer.getInt();
 			int NbSlotsRestantDisponiblesSurLaPage = buffer.getInt();
-			listePages.add(new DataPage(Idx_page_données, NbSlotsRestantDisponiblesSurLaPage));
+			listePages.add(new DataPage(Idx_page_donnees, NbSlotsRestantDisponiblesSurLaPage));
 		}
 
 	}
