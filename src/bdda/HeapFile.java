@@ -3,6 +3,7 @@ package bdda;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import exception.ReqException;
 import exception.SGBDException;
 
 public class HeapFile {
@@ -19,8 +20,27 @@ public class HeapFile {
 	/**
 	 * Gerer la création du fichier disque correspondant et le rajout d’une
 	 * HeaderPage « vide » à ce fichier
+	 * 
+	 * @throws ReqException,SGBDException
+	 * @throws IOException
 	 */
-	public void createNewOnDisk() {
+	public void createNewOnDisk(PageId pageId) throws IOException, ReqException, SGBDException {
+		// On creer un nouveau fichier qui correspond a l'id donner par le pointeur(qui
+		// correspond la relation concerne)
+		DiskManager.getInstance().createFile(pointeur.getFileIdx());
+		PageId newHeaderPage = new PageId(pointeur.getFileIdx(),0);
+		// Pour ajouter une page on a besoin d'une nouvelle page qui correspond a la
+		// HeaderPage
+		// l'identifiant de la headerpage sera toujours 0 car il s'agit
+		// de la premiere page du fichier
+		DiskManager.getInstance().addPage(pointeur.getFileIdx(), newHeaderPage);
+		ByteBuffer bufferNewHeaderPage = BufferManager.getInstance().getPage(newHeaderPage);
+		HeaderPageInfo headerPageInfo = new HeaderPageInfo();
+		headerPageInfo.setDataPageCount(0);
+		headerPageInfo.writeToBuffer(bufferNewHeaderPage);
+		//Pas plutot mettre le type dirty en int ? 
+		//Comme dans les exercices vu en amphi ?
+		BufferManager.getInstance().freePage(newHeaderPage,true);
 
 	}
 
