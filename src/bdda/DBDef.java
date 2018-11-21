@@ -1,12 +1,15 @@
 package bdda;
 
+import exception.SGBDException;
+
+import java.io.*;
 import java.util.ArrayList;
 
 public class DBDef {
 	private ArrayList<RelDef> listeDeRelDef;
 	private int compteurRel;
 	
-	private static final DBDef dbdef = new DBDef();
+	private static DBDef dbdef = new DBDef();
 	private DBDef() {
 		listeDeRelDef = new ArrayList<RelDef>();
 	}
@@ -40,9 +43,25 @@ public class DBDef {
 	public void setCompteurRel(int compteurRel) {
 		this.compteurRel = compteurRel;
 	}
-	
-	public void init() {
-		
+
+	/** Initialiser la classe lorsque le programme démarre à partir d'un fichier Catalog.def
+	 * */
+	public void init() throws SGBDException {
+		File fichier = new File(Constantes.pathName + "Catalog.def");
+		try(FileInputStream fis = new FileInputStream(fichier); ObjectInputStream ois = new ObjectInputStream(fis)){
+			dbdef = (DBDef) ois.readObject();
+		} catch (FileNotFoundException e) { // si le fichier Catalog.def n'existe pas
+			dbdef = new DBDef(); // on initialise la classe sans rien en plus
+			try {
+				fichier.createNewFile(); // On crée le fichier
+			} catch (IOException ioe) {
+				throw new SGBDException("Impossible de creer un fichier");
+			}
+		} catch (IOException e) { // S'il y a une autre erreurr d'I/O
+			throw new SGBDException("Erreur lors de la lecture de l'objet DBDef dans le fichier Catalog.def");
+		} catch (ClassNotFoundException e) {
+			throw new SGBDException("Euh c'est bizarre là, la classe DBDef ne trouve pas la classe DBDef");
+		}
 	}
 	
 	public void finish() {

@@ -100,7 +100,16 @@ public class DBManager {
 				default:
 					if(typesDesColonnes.get(i).substring(0, 5).equals("string")){
 						try{
-							int x = Integer.parseInt(typesDesColonnes.get(i).substring(6));
+							int nb_chiffres = 0; // compteur qui va compter le nombre de chiffres dans le nombre
+							for(int j = 0; j<4; j++){
+								try{
+									Integer.parseInt(typesDesColonnes.get(i).substring(6+j));
+									nb_chiffres++;
+								}catch(Exception e){
+									// rien à faire, ça veut juste dire qu'il n'y a pas plus de 3 chiffres dans x
+								}
+							}
+							int x = Integer.parseInt(typesDesColonnes.get(i).substring(6, 6+nb_chiffres));
 							if(x <= 1000 && x>0){
 								recordSize += x * Constantes.recordSize_stringx;
 							} else {
