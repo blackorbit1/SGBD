@@ -42,7 +42,6 @@ public class DBDef {
 	}
 	
 	public void init() {
-		FileManager.getInstance().init();
 		
 	}
 	
