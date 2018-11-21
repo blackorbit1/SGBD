@@ -98,7 +98,35 @@ public class HeapFile {
 		}
 	}
 
-	public void updateHeaderWithTakenSlot(PageId iPageId) {
+	/**
+	 *  actualise les informations dans la Header Page suite à l’occupation d’une des cases disponible sur une page
+	 * @param iPageId de la page a modifier
+	 * @throws SGBDException 
+	 */
+	public void updateHeaderWithTakenSlot(PageId iPageId) throws SGBDException {
+
+		PageId headerPage = new PageId(pointeur.getFileIdx(), 0);
+		try {
+			ByteBuffer bufferHeaderPage = BufferManager.getInstance().getPage(headerPage) ;
+			HeaderPageInfo hpi = new HeaderPageInfo();
+			hpi.readFromBuffer(bufferHeaderPage); 
+			boolean pageTrouver=false;
+			for (DataPage d : hpi.getListePages()) {
+				if (d.getPageIdx() == iPageId.getPageIdx()) {
+					d.setPageIdx(iPageId.getPageIdx());
+					d.setFreeSlots((d.getFreeSlots()+1));
+					pageTrouver = true;
+					break;
+				}
+			}
+			if(pageTrouver){
+				hpi.writeToBuffer(bufferHeaderPage);
+				BufferManager.getInstance().freePage(headerPage, true);
+			}
+			
+		} catch (SGBDException e) {
+			throw new SGBDException("Erreur d'I/O lors de la creation d'une page");
+		}
 
 	}
 
