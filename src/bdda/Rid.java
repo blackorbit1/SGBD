@@ -4,6 +4,11 @@ public class Rid {
 
 	private PageId pageId;
 	private int slotIdx;
+	
+	public Rid(PageId pid, int slotId) {
+		this.pageId = pid;
+		this.slotIdx = slotId;
+	}
 
 	public PageId getPageId() {
 		return pageId;
