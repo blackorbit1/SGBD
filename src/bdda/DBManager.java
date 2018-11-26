@@ -28,10 +28,10 @@ public class DBManager {
 	public void processCommand(String commande) throws ReqException {
 		StringTokenizer st = new StringTokenizer(commande);
 		String action = st.nextToken();
+		String nomRelation = "";
 		
 		switch(action) {
 			case "create":
-				String nomRelation = "";
 				int nombreColonnes = 0;
 				ArrayList<String> typesDesColonnes = new ArrayList<>();
 				
@@ -58,6 +58,15 @@ public class DBManager {
 				System.out.println(typesDesColonnes);
 				createRelation(nomRelation, nombreColonnes, typesDesColonnes);
 				break;
+			case "insert":
+				nomRelation = st.nextToken();
+				ArrayList<String> contenuDesColonnes = new ArrayList<>();
+				for(int i = 0; st.hasMoreTokens(); i++) {
+					contenuDesColonnes.add(st.nextToken());
+				}
+				FileManager.getInstance().insertRecordInRelation(nomRelation, contenuDesColonnes);
+				// Aucune gestion d'erreur, comme demandé dans la consigne
+				break;
 			default:
 				throw new ReqException("Commande inconnue");
 		}
@@ -78,6 +87,7 @@ public class DBManager {
 	public void finish() {
 		
 	}
+
 	
 	/** la fonction pour creer la relation
 	 * 
