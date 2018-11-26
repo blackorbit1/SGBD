@@ -24,7 +24,7 @@ public class HeapFile {
 	 * @throws ReqException,SGBDException
 	 * @throws IOException
 	 */
-	public void createNewOnDisk(PageId pageId) throws IOException, ReqException, SGBDException {
+	public void createNewOnDisk() throws IOException, ReqException, SGBDException {
 		// On creer un nouveau fichier qui correspond a l'id donner par le pointeur(qui
 		// correspond la relation concerne)
 		try {
