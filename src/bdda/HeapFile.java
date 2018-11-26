@@ -2,6 +2,7 @@ package bdda;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import exception.ReqException;
 import exception.SGBDException;
@@ -25,8 +26,8 @@ public class HeapFile {
 	 * @throws IOException
 	 */
 	public void createNewOnDisk(PageId pageId) throws IOException, ReqException, SGBDException {
-		// On creer un nouveau fichier qui correspond a l'id donner par le pointeur(qui
-		// correspond la relation concerne)
+		// On creer un nouveau fichier qui correspond a l'id donne par le pointeur(qui
+		// correspond la relation concernee)
 		try {
 			DiskManager.getInstance().createFile(pointeur.getFileIdx());
 			PageId newHeaderPage = new PageId(pointeur.getFileIdx(), 0);
@@ -99,7 +100,7 @@ public class HeapFile {
 	}
 
 	/**
-	 *  actualise les informations dans la Header Page suite à l’occupation d’une des cases disponible sur une page
+	 *  actualise les informations dans la Header Page suite à l’occupation d’une des cases disponibles sur une page
 	 * @param iPageId de la page a modifier
 	 * @throws SGBDException 
 	 */
@@ -128,6 +129,11 @@ public class HeapFile {
 			throw new SGBDException("Erreur d'I/O lors de la creation d'une page");
 		}
 
+	}
+
+	public Rid insertRecord (ArrayList<String> iRecord){
+		/// code ///
+		return new Rid();
 	}
 
 }

@@ -63,8 +63,26 @@ public class DBDef {
 			throw new SGBDException("Euh c'est bizarre là, la classe DBDef ne trouve pas la classe DBDef");
 		}
 	}
-	
-	public void finish() {
-		
-	}
+
+	/** Permet d'enregistrer l'instance de la classe dans le fichier Catalog.def avant d'arreter le programme
+	 *
+	 * @throws SGBDException
+	 */
+	public void finish() throws SGBDException {
+        File fichier = new File(Constantes.pathName + "Catalog.def");
+        if(!fichier.exists()) { // Si le fichier n'existe pas
+            try {
+                fichier.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try(FileOutputStream fos = new FileOutputStream(fichier); ObjectOutputStream oos = new ObjectOutputStream(fos)){
+            oos.writeObject(dbdef);
+        } catch (FileNotFoundException e) {
+            throw new SGBDException("Impossible de creer un fichier");
+        } catch (IOException e) {
+            throw new SGBDException("Erreur lors de l'écriture de l'objet DBDef dans le fichier Catalog.def");
+        }
+    }
 }
