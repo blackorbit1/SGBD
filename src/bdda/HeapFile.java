@@ -87,7 +87,7 @@ public class HeapFile {
 				// toutes les cases sont vides
 				nouvellePage.position(0);
 				for (int i = 0; i < pointeur.getSlotCount(); i++) {
-					nouvellePage.putInt(0);
+					nouvellePage.put((byte) 0);
 				}
 
 				BufferManager.getInstance().freePage(newpid, true);
