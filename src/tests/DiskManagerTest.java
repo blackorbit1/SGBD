@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import bdda.Constantes;
 import bdda.DiskManager;
 import bdda.PageId;
-import exception.ReqException;
+import exception.SGBDException;
 
 class DiskManagerTest {
 
@@ -27,17 +27,26 @@ class DiskManagerTest {
 			dm.addPage(2, pid);
 			dm.addPage(2, pid2);
 			dm.addPage(2, pid3);
-			
-			dm.writePage(pid, ByteBuffer.allocate(Constantes.pageSize));
-			dm.readPage(pid, ByteBuffer.allocate(Constantes.pageSize));
-			
-			
+
+			ByteBuffer bf = ByteBuffer.allocate(Constantes.pageSize);
+			while (bf.hasRemaining()) {
+				bf.putInt(1);
+			}
+
+			ByteBuffer copie = ByteBuffer.allocate(Constantes.pageSize);
+			dm.writePage(pid, bf);
+			dm.readPage(pid, copie);
+
+			while (bf.hasRemaining()) {
+				assertEquals(bf.getInt(), copie.getInt());
+			}
+
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (ReqException e) {
+		} catch (SGBDException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 }

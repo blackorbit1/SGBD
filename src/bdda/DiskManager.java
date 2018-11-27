@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import exception.ReqException;
+import exception.SGBDException;
 
 public class DiskManager {
 
@@ -26,11 +27,11 @@ public class DiskManager {
 	 * 
 	 * @param iFileIdx identifiant du fichier qu'on creer
 	 * @throws IOException
-	 * @throws ReqException
+	 * @throws SGBDException
 	 */
-	public void createFile(int iFileIdx) throws IOException, ReqException {
+	public void createFile(int iFileIdx) throws IOException, SGBDException {
 		if (iFileIdx < 0)
-			throw new ReqException("L'id du fichier doit �tre sup�rieur � 0");
+			throw new SGBDException("L'id du fichier doit �tre sup�rieur � 0");
 
 		File file = new File(Constantes.pathName + "Data_" + iFileIdx + ".rf");
 		System.out.println(file.getAbsolutePath());
@@ -97,7 +98,9 @@ public class DiskManager {
 			FileChannel fc = readFile.getChannel();
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
+			iBuffer.clear();
 			fc.read(iBuffer);
+
 			fc.close();
 		}
 
@@ -119,7 +122,11 @@ public class DiskManager {
 			FileChannel fc = writeFile.getChannel();
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
-			fc.write(oBuffer);
+			oBuffer.flip();
+
+			while (oBuffer.hasRemaining()) {
+				fc.write(oBuffer);
+			}
 			fc.close();
 		}
 	}
