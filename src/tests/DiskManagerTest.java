@@ -3,9 +3,11 @@ package tests;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
 
+import bdda.Constantes;
 import bdda.DiskManager;
 import bdda.PageId;
 import exception.ReqException;
@@ -26,6 +28,8 @@ class DiskManagerTest {
 			dm.addPage(2, pid2);
 			dm.addPage(2, pid3);
 			
+			dm.writePage(pid, ByteBuffer.allocate(Constantes.pageSize));
+			dm.readPage(pid, ByteBuffer.allocate(Constantes.pageSize));
 			
 			
 		} catch (IOException e) {

@@ -30,7 +30,7 @@ public class DiskManager {
 	 */
 	public void createFile(int iFileIdx) throws IOException, ReqException {
 		if (iFileIdx < 0)
-			throw new ReqException("L'id du fichier doit être supérieur à 0");
+			throw new ReqException("L'id du fichier doit ï¿½tre supï¿½rieur ï¿½ 0");
 
 		File file = new File(Constantes.pathName + "Data_" + iFileIdx + ".rf");
 		System.out.println(file.getAbsolutePath());
@@ -40,7 +40,7 @@ public class DiskManager {
 	}
 
 	/**
-	 * Cette fonction ajoute une nouvelle page de taille 4ko à la fin du fichier (
+	 * Cette fonction ajoute une nouvelle page de taille 4ko ï¿½ la fin du fichier (
 	 * pour l'instant)
 	 * 
 	 * @param iFileIdx identifiant du fichier
@@ -74,7 +74,7 @@ public class DiskManager {
 			// seek permet de connaitre la derniere position du fichier
 			rf.seek(rf.length());
 
-			// On écrit le contenu du buffer
+			// On ï¿½crit le contenu du buffer
 			rf.write(bf.array());
 
 			oPageId.setFileIdx(iFileIdx);
@@ -114,7 +114,7 @@ public class DiskManager {
 		// On recupere le fichier qui contient la page qu'on veut modifier
 
 		try (RandomAccessFile writeFile = new RandomAccessFile(Constantes.pathName + iPageId.getFileIdx() + ".rf",
-				"w")) {
+				"rw")) {
 
 			FileChannel fc = writeFile.getChannel();
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
