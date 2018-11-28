@@ -214,7 +214,6 @@ public class HeapFile {
 	}
 
 	public Record readRecordFromBuffer(ByteBuffer iBuffer, int iSlotIdx) {
-		long positionDebutByteMap = pointeur.getSlotCount();
 		Record record = new Record();
 		iBuffer.position(pointeur.getSlotCount() + (iSlotIdx * pointeur.getRecordSize()));
 
@@ -242,10 +241,9 @@ public class HeapFile {
 	}
 
 	public ArrayList<Record> getRecordsOnPage(PageId iPageId) {
+		ArrayList<Record> listRecord = new ArrayList<Record>();
 		try {
 			ByteBuffer bfPage = BufferManager.getInstance().getPage(iPageId);
-
-			ArrayList<Record> listRecord = new ArrayList<Record>();
 			bfPage.position(0);
 			for (int i = 0; i < pointeur.getSlotCount(); i++) {
 				if (bfPage.get() == 1) {
@@ -257,7 +255,32 @@ public class HeapFile {
 		} catch (SGBDException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return listRecord;
+
+	}
+
+	public ArrayList<PageId> getDataPagesIds() {
+		ArrayList<PageId> listPageId = new ArrayList<PageId>();
+		try {
+
+			PageId headerpage = new PageId(pointeur.getFileIdx(), 0);
+			ByteBuffer bufferHeaderPage;
+			bufferHeaderPage = BufferManager.getInstance().getPage(headerpage);
+			HeaderPageInfo headerPageI = new HeaderPageInfo();
+			headerPageI.readFromBuffer(bufferHeaderPage);
+
+			for (DataPage d : headerPageI.getListePages()) {
+				listPageId.add(new PageId(pointeur.getFileIdx(), d.getPageIdx()));
+			}
+
+			return listPageId;
+
+		} catch (SGBDException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return listPageId;
 
 	}
 
