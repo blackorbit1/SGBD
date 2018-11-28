@@ -40,18 +40,18 @@ public class FileManager {
 	}
 
 	/**
-	 * fonction pour utiliser la méthode insertRecord() du HeapFile correspondant à
+	 * fonction pour utiliser la methode insertRecord() du HeapFile correspondant a
 	 * la relation en question
 	 *
 	 * @param iRelationName
 	 *            (le nom de la relation)
 	 * @param iRecord
-	 *            (le contenu du tuple à ajouter)
-	 * @return (l'ID du tuple ajouté)
+	 *            (le contenu du tuple a ajouter)
+	 * @return (l'ID du tuple ajoute)
 	 */
 	Rid insertRecordInRelation(String iRelationName, Record iRecord) {
-		// parcourir la liste des HeapFiles pour trouver celui qui correspond à la
-		// relation en question, et ensuite appeler sa propre méthode InsertRecord
+		// parcourir la liste des HeapFiles pour trouver celui qui correspond a la
+		// relation en question, et ensuite appeler sa propre methode InsertRecord
 		Rid rid = null;
 		for (int i = 0; i < listeHeapFiles.size(); i++) {
 			if (listeHeapFiles.get(i).getPointeur().getNom().equals(iRelationName)) {
