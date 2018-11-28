@@ -31,7 +31,7 @@ public class DiskManager {
 	 */
 	public void createFile(int iFileIdx) throws IOException, SGBDException {
 		if (iFileIdx < 0)
-			throw new SGBDException("L'id du fichier doit �tre sup�rieur � 0");
+			throw new SGBDException("L'id du fichier doit etre superieur a 0");
 
 		File file = new File(Constantes.pathName + "Data_" + iFileIdx + ".rf");
 		System.out.println(file.getAbsolutePath());
@@ -41,7 +41,7 @@ public class DiskManager {
 	}
 
 	/**
-	 * Cette fonction ajoute une nouvelle page de taille 4ko � la fin du fichier (
+	 * Cette fonction ajoute une nouvelle page de taille 4ko a la fin du fichier (
 	 * pour l'instant)
 	 * 
 	 * @param iFileIdx identifiant du fichier
@@ -75,7 +75,7 @@ public class DiskManager {
 			// seek permet de connaitre la derniere position du fichier
 			rf.seek(rf.length());
 
-			// On �crit le contenu du buffer
+			// On ecrit le contenu du buffer
 			rf.write(bf.array());
 
 			oPageId.setFileIdx(iFileIdx);
