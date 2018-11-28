@@ -30,7 +30,7 @@ public class HeaderPageInfo {
 	}
 
 	/**
-	 * Lit le buffer correspondant � la headerPage et remplit les attributs
+	 * Lit le buffer correspondant a la headerPage et remplit les attributs
 	 * d'instance
 	 * 
 	 * @param buffer remplit avec le contenu de la header Page ( page d'id 0 )
