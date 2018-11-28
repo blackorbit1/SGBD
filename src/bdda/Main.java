@@ -3,6 +3,7 @@ package bdda;
 import java.util.Scanner;
 
 import exception.ReqException;
+import exception.SGBDException;
 
 public class Main {
 	public static void main(String [] args) {
@@ -23,6 +24,8 @@ public class Main {
 				}
 				db.afficher();
 			} catch(ReqException e) {
+				System.out.println(e.getMessage());
+			} catch (SGBDException e){
 				System.out.println(e.getMessage());
 			} catch(Exception e) {
 				System.out.println("bonjour");

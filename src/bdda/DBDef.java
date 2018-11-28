@@ -12,6 +12,7 @@ public class DBDef {
 	private static DBDef dbdef = new DBDef();
 	private DBDef() {
 		listeDeRelDef = new ArrayList<RelDef>();
+		this.compteurRel = 0;
 	}
 	
 	public static DBDef getInstance() {

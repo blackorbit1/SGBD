@@ -1,9 +1,11 @@
 package bdda;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import exception.ReqException;
+import exception.SGBDException;
 
 public class DBManager {
 	private DBDef dbDef ;
@@ -19,13 +21,14 @@ public class DBManager {
 	
 	public void init() {
 		dbDef = DBDef.getInstance();
+		FileManager.getInstance().init();
 	}
 	
 	/**
  	 * fonction qui execute la commande
  	 * @param commande
  	 */
-	public void processCommand(String commande) throws ReqException {
+	public void processCommand(String commande) throws ReqException, SGBDException {
 		StringTokenizer st = new StringTokenizer(commande);
 		String action = st.nextToken();
 		String nomRelation = "";
@@ -66,6 +69,26 @@ public class DBManager {
 				}
 				// Aucune gestion d'erreur, comme demande dans la consigne
 				break;
+			case "fill":
+				nomRelation = st.nextToken();
+				String nom_fichier = st.nextToken();
+				fill(nomRelation, nom_fichier);
+				break;
+			case "debug": /// /// commande de debug poour tester des fonctions du SGBD /// ///
+				switch(st.nextToken()){
+					case "createfile": /// /// commande qui cree une fichier vide dans le classpath /// ///
+						String nomFichier = st.nextToken();
+						File fichier = new File(Constantes.pathName + nomFichier);
+						try {
+							fichier.createNewFile();
+						} catch (IOException e) {
+							throw new SGBDException("impossible de creer un fichier dans "+ Constantes.pathName);
+						}
+						break;
+					default:
+						break;
+				}
+				break;
 			default:
 				throw new ReqException("Commande inconnue");
 		}
@@ -85,6 +108,28 @@ public class DBManager {
 	
 	public void finish() {
 		
+	}
+
+	public void fill(String nomRelation, String nomFichier) throws SGBDException {
+		File fichier = new File(Constantes.pathName + nomFichier);
+		if(!fichier.exists()){
+			throw new SGBDException("le fichier que vous demandez n'existe pas");
+		}
+		try(
+				FileInputStream is = new FileInputStream(fichier);
+				DataInputStream dis = new DataInputStream(is)){
+			System.out.println(dis.readLine());
+			System.out.println(dis.readLine());
+			System.out.println(dis.readLine());
+			StringTokenizer stFile = new StringTokenizer(dis.readLine(), "\n");
+			while(stFile.countTokens() > 0){
+				StringTokenizer stRow = new StringTokenizer(stFile.nextToken(), ",");
+				System.out.println(stRow.toString());
+			}
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			throw new SGBDException("impossible de lire le fichier fourni");
+		}
 	}
 
 	/** la fonction pour inserer un tuple dans une relation
@@ -154,5 +199,7 @@ public class DBManager {
 		relation.setFileIdx(dbDef.getCompteurRel());
 
 		dbDef.addRelation(relation);
+
+		FileManager.getInstance().createNewHeapFile(relation);
 	}
 }
