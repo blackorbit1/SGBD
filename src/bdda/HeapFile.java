@@ -18,8 +18,8 @@ public class HeapFile {
 	}
 
 	/**
-	 * Gerer la création du fichier disque correspondant et le rajout d’une
-	 * HeaderPage « vide » à ce fichier
+	 * Gerer la creation du fichier disque correspondant et le rajout d’une
+	 * HeaderPage « vide » a ce fichier
 	 * 
 	 * @throws ReqException,SGBDException
 	 * @throws IOException
@@ -43,7 +43,7 @@ public class HeapFile {
 			// Comme dans les exercices vu en amphi ?
 			BufferManager.getInstance().freePage(newHeaderPage, true);
 		} catch (IOException e) {
-			throw new SGBDException("Erreur au niveau de la création du fichier sur le disque (HeapFile)");
+			throw new SGBDException("Erreur au niveau de la creation du fichier sur le disque (HeapFile)");
 		}
 
 	}
@@ -94,12 +94,12 @@ public class HeapFile {
 
 			}
 		} catch (IOException e) {
-			throw new SGBDException("Erreur d'I/O lors de la création d'une page (HeapFile)");
+			throw new SGBDException("Erreur d'I/O lors de la creation d'une page (HeapFile)");
 		}
 	}
 
 	/**
-	 * actualise les informations dans la Header Page suite à l’occupation d’une des
+	 * actualise les informations dans la Header Page suite a l’occupation d’une des
 	 * cases disponible sur une page
 	 * 
 	 * @param iPageId de la page a modifier
@@ -134,12 +134,12 @@ public class HeapFile {
 	}
 
 	/**
-	 * Cette méthode prend en argument un Record, un buffer (=une page en « format
-	 * buffer ») et l’indice d’une case dans la page. Elle doit écrire le Record
-	 * dans le buffer à la position (offset) qui va bien – à vous de calculer cette
+	 * Cette methode prend en argument un Record, un buffer (=une page en « format
+	 * buffer ») et l’indice d’une case dans la page. Elle doit ecrire le Record
+	 * dans le buffer a la position (offset) qui va bien – a vous de calculer cette
 	 * position, en fonction de l’indice de la case, la taille du record, et sans
-	 * oublier la présence de la bytemap au début du buffer (rappel : la taille de
-	 * la bytemap est donnée par la variable slotCount de la RelDef).
+	 * oublier la presence de la bytemap au debut du buffer (rappel : la taille de
+	 * la bytemap est donnee par la variable slotCount de la RelDef).
 	 * 
 	 * @param iRecord
 	 * @param ioBuffer
@@ -171,13 +171,13 @@ public class HeapFile {
 	}
 
 	/**
-	 * Cette méthode prend en argument un Record et un PageId et écrit le record
+	 * Cette methode prend en argument un Record et un PageId et ecrit le record
 	 * dans la page comme suit : - d’abord, le buffer de la page est obtenu via le
 	 * BufferManager. - ensuite, nous cherchons, avec la bytemap, une case
-	 * disponible ; nous supposons qu’une telle case existe à l’appel de cette
-	 * méthode ! - puis nous écrivons le Record avec writeRecordInBuffer - puis nous
-	 * actualisons la bytemap pour spécifier que la case est « occupée » (octet de
-	 * valeur 1) - enfin, nous libérons le buffer de la page auprès du BufferManager
+	 * disponible ; nous supposons qu’une telle case existe a l’appel de cette
+	 * methode ! - puis nous ecrivons le Record avec writeRecordInBuffer - puis nous
+	 * actualisons la bytemap pour specifier que la case est « occupee » (octet de
+	 * valeur 1) - enfin, nous liberons le buffer de la page aupres du BufferManager
 	 * 
 	 * @param iRecord
 	 * @param iPageId
@@ -197,7 +197,7 @@ public class HeapFile {
 					bufferPage.position(i);
 					// Attention peut être faux byte en int
 					bufferPage.put((byte) 1);
-					// A vérifier appel update
+					// A verifier appel update
 					updateHeaderWithTakenSlot(iPageId);
 					BufferManager.getInstance().freePage(iPageId, true);
 					break;
@@ -213,7 +213,7 @@ public class HeapFile {
 	}
 
 	/**
-	 * Insére un record dans une page
+	 * Insere un record dans une page
 	 * @param iRecord
 	 * @return Rid 
 	 */
