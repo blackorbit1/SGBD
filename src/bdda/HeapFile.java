@@ -2,6 +2,7 @@ package bdda;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import exception.ReqException;
 import exception.SGBDException;
@@ -116,7 +117,7 @@ public class HeapFile {
 			for (DataPage d : hpi.getListePages()) {
 				if (d.getPageIdx() == iPageId.getPageIdx()) {
 					// d.setPageIdx(iPageId.getPageIdx());
-					// d.setFreeSlots((d.getFreeSlots() + 1)); Faux
+					// d.setFreeSlots((d.getFreeSlots() + 1)); -Faux
 					d.setFreeSlots((d.getFreeSlots() - 1));
 					pageTrouver = true;
 					break;
@@ -159,7 +160,7 @@ public class HeapFile {
 			} else if (type.equals("float")) {
 				ioBuffer.putFloat(Float.parseFloat(valeur));
 			} else if (type.equals("string")) {
-				int taille = Integer.parseInt(type.substring(5));
+				int taille = Integer.parseInt(type.substring(6));
 				for (int j = 0; j < taille; j++) {
 					ioBuffer.putChar(valeur.charAt(j));
 				}
@@ -212,10 +213,59 @@ public class HeapFile {
 
 	}
 
+	public Record readRecordFromBuffer(ByteBuffer iBuffer, int iSlotIdx) {
+		long positionDebutByteMap = pointeur.getSlotCount();
+		Record record = new Record();
+		iBuffer.position(pointeur.getSlotCount() + (iSlotIdx * pointeur.getRecordSize()));
+
+		for (int i = 0; i < pointeur.getNbColonne(); i++) {
+			String type = pointeur.getType().get(i);
+
+			if (type.equals("int")) {
+				record.addValue(Integer.toString(iBuffer.getInt()));
+			} else if (type.equals("float")) {
+				record.addValue(Float.toString(iBuffer.getFloat()));
+			} else if (type.equals("string")) {
+				int taille = Integer.parseInt(type.substring(6));
+				StringBuilder sb = new StringBuilder();
+				for (int j = 0; j < taille; j++) {
+					sb.append(iBuffer.getChar());
+				}
+				record.addValue(sb.toString());
+
+			}
+
+		}
+
+		return record;
+
+	}
+
+	public ArrayList<Record> getRecordsOnPage(PageId iPageId) {
+		try {
+			ByteBuffer bfPage = BufferManager.getInstance().getPage(iPageId);
+
+			ArrayList<Record> listRecord = new ArrayList<Record>();
+			bfPage.position(0);
+			for (int i = 0; i < pointeur.getSlotCount(); i++) {
+				if (bfPage.get() == 1) {
+					listRecord.add(readRecordFromBuffer(bfPage, i));
+				}
+			}
+			BufferManager.getInstance().freePage(iPageId, false);
+			return listRecord;
+		} catch (SGBDException e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
 	/**
 	 * Insere un record dans une page
+	 * 
 	 * @param iRecord
-	 * @return Rid 
+	 * @return Rid
 	 */
 	public Rid insertRecord(Record iRecord) {
 		PageId pid = new PageId();
