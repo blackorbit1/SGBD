@@ -37,7 +37,7 @@ public class DBManager {
 				
 				nomRelation = st.nextToken();
 				
-				try { // On regarde si le nombre de colonnes indiqué est bien un nombre
+				try { // On regarde si le nombre de colonnes indique est bien un nombre
 					nombreColonnes = Integer.parseInt(st.nextToken());
 				} catch(Exception e) { // si non, on lance une exception
 					throw new ReqException("Le nombre de colonnes n'est pas un entier");
@@ -64,7 +64,7 @@ public class DBManager {
 				for(int i = 0; st.hasMoreTokens(); i++) {
 					contenuDesColonnes.add(st.nextToken());
 				}
-				// Aucune gestion d'erreur, comme demandé dans la consigne
+				// Aucune gestion d'erreur, comme demande dans la consigne
 				break;
 			default:
 				throw new ReqException("Commande inconnue");
@@ -126,7 +126,7 @@ public class DBManager {
 									Integer.parseInt(typesDesColonnes.get(i).substring(6+j));
 									nb_chiffres++;
 								}catch(Exception e){
-									// rien à faire, ça veut juste dire qu'il n'y a pas plus de 3 chiffres dans x
+									// rien a faire, ça veut juste dire qu'il n'y a pas plus de 3 chiffres dans x
 								}
 							}
 							int x = Integer.parseInt(typesDesColonnes.get(i).substring(6, 6+nb_chiffres));
@@ -136,13 +136,13 @@ public class DBManager {
 								throw new ReqException("La taille d'une colonne de type string est incorrecte (min: 1, max: 1000)");
 							}
 						} catch (Exception e){
-							throw new ReqException("Une colonne de type string est mal déclarée");
+							throw new ReqException("Une colonne de type string est mal declaree");
 						}
 					}
 			}
 		}
 		if(Constantes.pageSize / recordSize == 0){
-			throw new ReqException("La relation que vous tentez de creer prend trop de place par rapport à la taille max d'une page");
+			throw new ReqException("La relation que vous tentez de creer prend trop de place par rapport a la taille max d'une page");
 		}
 
 		RelDef relation = new RelDef();
