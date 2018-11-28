@@ -64,7 +64,6 @@ public class DBManager {
 				for(int i = 0; st.hasMoreTokens(); i++) {
 					contenuDesColonnes.add(st.nextToken());
 				}
-				FileManager.getInstance().insertRecordInRelation(nomRelation, contenuDesColonnes);
 				// Aucune gestion d'erreur, comme demandé dans la consigne
 				break;
 			default:
@@ -88,6 +87,17 @@ public class DBManager {
 		
 	}
 
+	/** la fonction pour inserer un tuple dans une relation
+	 *
+	 * @param nomRelation (nom de la relation)
+	 * @param contenuDesColonnes (contenu du tuple)
+	 */
+	public void insertRecord(String nomRelation, ArrayList<String> contenuDesColonnes){
+		Record record = new Record();
+		record.setValues(contenuDesColonnes);
+		FileManager.getInstance().insertRecordInRelation(nomRelation, record);
+
+	}
 	
 	/** la fonction pour creer la relation
 	 * 

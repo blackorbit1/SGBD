@@ -49,7 +49,7 @@ public class FileManager {
 	 *            (le contenu du tuple à ajouter)
 	 * @return (l'ID du tuple ajouté)
 	 */
-	Rid insertRecordInRelation(String iRelationName, ArrayList<String> iRecord) {
+	Rid insertRecordInRelation(String iRelationName, Record iRecord) {
 		// parcourir la liste des HeapFiles pour trouver celui qui correspond à la
 		// relation en question, et ensuite appeler sa propre méthode InsertRecord
 		Rid rid = null;
