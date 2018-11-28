@@ -13,7 +13,7 @@ public class BufferManager {
     //Pour avoir une unique instance de BufferManager
     private static final BufferManager instance = new BufferManager();
 
-    /** Constructeur de ctte classe qui crée un tableau de frames
+    /** Constructeur de cette classe qui cree un tableau de frames
      */
     private BufferManager() {
         this.frames = new ArrayList<Frame>();
@@ -39,7 +39,7 @@ public class BufferManager {
         String chaine;
 
 
-        // On verifie si la page est pas dejà dans une frame de notre tableau.
+        // On verifie si la page est pas deja dans une frame de notre tableau
         for(int i = 0; i<frames.size();i++){
             if(frames.get(i).getPageId().getPageIdx() == iPageId.getPageIdx()){
                 return(frames.get(i).getContent());
@@ -79,23 +79,23 @@ public class BufferManager {
             // On met le contenu de la page demandee dans la frame
             page.setContent(bf);
 
-            // On une reference à notre nouvelle frame dans le tableau des frames
+            // On une reference a notre nouvelle frame dans le tableau des frames
             frames.set(indexPlace, page);
         } else {
-            int indexOldestDate = 0; // l'index de la frame dont le pin count est passe à 0 le moins recemment
-            Date oldestDate = new Date(); // la date de la frame dont le pin count est passe à 0 le moins recemment
+            int indexOldestDate = 0; // l'index de la frame dont le pin count est passe a 0 le moins recemment
+            Date oldestDate = new Date(); // la date de la frame dont le pin count est passe a 0 le moins recemment
 
-            // On cherche la frame dont le pin count est passe à 0 le moins recemment
+            // On cherche la frame dont le pin count est passe a 0 le moins recemment
             for(int i = 0; i<frames.size(); i++){
                 if(frames.get(i).getUnpinned().getTime() < oldestDate.getTime()){
                     indexOldestDate = i;
                     oldestDate = frames.get(i).getUnpinned();
-                    // On enregistre les modifications faites à la page associee à la frame qu'on va utiliser pour notre nouvelle page
+                    // On enregistre les modifications faites a la page associee a la frame qu'on va utiliser pour notre nouvelle page
                     freeFrame(i, frames.get(i).isDirty());
                 }
             }
 
-            Frame instanceFrameTraitee = frames.get(indexOldestDate); // Creation d'un pointeur vers la frame à changer pour simplifier le code
+            Frame instanceFrameTraitee = frames.get(indexOldestDate); // Creation d'un pointeur vers la frame a changer pour simplifier le code
 
             // Installation de la nouvelle page dans la frame
             instanceFrameTraitee.setPageId(iPageId);
@@ -111,7 +111,7 @@ public class BufferManager {
     }
 
     /** Liberer une page
-     * @param indexFrame l'index de la frame qui contient la page à virer
+     * @param indexFrame l'index de la frame qui contient la page a virer
      * @param iIsDirty TRUE pour change FALSE pour inchange
      */
     private void freeFrame(int indexFrame, boolean iIsDirty) throws SGBDException {
@@ -138,13 +138,13 @@ public class BufferManager {
     }
 
     /** Liberer une page
-     * @param pageId l'index de la frame qui contient la page à virer
+     * @param pageId l'index de la frame qui contient la page a virer
      * @param iIsDirty TRUE pour change FALSE pour inchange
      */
     public void freePage(PageId pageId, boolean iIsDirty) throws SGBDException {
         for(int i = 0; i<frames.size(); i++){
             if(frames.get(i).getPageId().getPageIdx() == pageId.getPageIdx()) {
-                if (frames.get(i).getPin_count() > 0) { // Si pin_count est superieur à 0, on le decremente
+                if (frames.get(i).getPin_count() > 0) { // Si pin_count est superieur a 0, on le decremente
                     frames.get(i).setPin_count(frames.get(i).getPin_count() - 1);
                 }
                 // On declare la page comme ayant ete potentiellement changee
