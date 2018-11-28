@@ -20,7 +20,7 @@ public class DBDef {
 	
 	/** Pour ajouter une relation
 	 * 
-	 * @param relation (la relation à ajouter)
+	 * @param relation (la relation a ajouter)
 	 */
 	public void addRelation(RelDef relation) {
 		listeDeRelDef.add(relation);
@@ -44,7 +44,7 @@ public class DBDef {
 		this.compteurRel = compteurRel;
 	}
 
-	/** Initialiser la classe lorsque le programme démarre à partir d'un fichier Catalog.def
+	/** Initialiser la classe lorsque le programme demarre a partir d'un fichier Catalog.def
 	 * */
 	public void init() throws SGBDException {
 		File fichier = new File(Constantes.pathName + "Catalog.def");
@@ -53,14 +53,14 @@ public class DBDef {
 		} catch (FileNotFoundException e) { // si le fichier Catalog.def n'existe pas
 			dbdef = new DBDef(); // on initialise la classe sans rien en plus
 			try {
-				fichier.createNewFile(); // On crée le fichier
+				fichier.createNewFile(); // On cree le fichier
 			} catch (IOException ioe) {
 				throw new SGBDException("Impossible de creer un fichier");
 			}
 		} catch (IOException e) { // S'il y a une autre erreurr d'I/O
 			throw new SGBDException("Erreur lors de la lecture de l'objet DBDef dans le fichier Catalog.def");
 		} catch (ClassNotFoundException e) {
-			throw new SGBDException("Euh c'est bizarre là, la classe DBDef ne trouve pas la classe DBDef");
+			throw new SGBDException("Euh c'est bizarre la, la classe DBDef ne trouve pas la classe DBDef");
 		}
 	}
 
@@ -82,7 +82,7 @@ public class DBDef {
         } catch (FileNotFoundException e) {
             throw new SGBDException("Impossible de creer un fichier");
         } catch (IOException e) {
-            throw new SGBDException("Erreur lors de l'écriture de l'objet DBDef dans le fichier Catalog.def");
+            throw new SGBDException("Erreur lors de l'ecriture de l'objet DBDef dans le fichier Catalog.def");
         }
     }
 }
