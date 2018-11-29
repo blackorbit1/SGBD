@@ -8,131 +8,133 @@ import exception.ReqException;
 import exception.SGBDException;
 
 public class DBManager {
-	private DBDef dbDef ;
-	
+	private DBDef dbDef;
+
 	private static final DBManager db = new DBManager();
+
 	private DBManager() {
-		
+
 	}
-	
+
 	public static DBManager getInstance() {
 		return db;
 	}
-	
+
 	public void init() {
 		dbDef = DBDef.getInstance();
 		FileManager.getInstance().init();
 	}
-	
+
 	/**
- 	 * fonction qui execute la commande
- 	 * @param commande
- 	 */
+	 * fonction qui execute la commande
+	 * 
+	 * @param commande
+	 */
 	public void processCommand(String commande) throws ReqException, SGBDException {
 		StringTokenizer st = new StringTokenizer(commande);
 		String action = st.nextToken();
 		String nomRelation = "";
-		
-		switch(action) {
-			case "create":
-				int nombreColonnes = 0;
-				ArrayList<String> typesDesColonnes = new ArrayList<>();
-				
-				nomRelation = st.nextToken();
-				
-				try { // On regarde si le nombre de colonnes indique est bien un nombre
-					nombreColonnes = Integer.parseInt(st.nextToken());
-				} catch(Exception e) { // si non, on lance une exception
-					throw new ReqException("Le nombre de colonnes n'est pas un entier");
-				}
-				
-				
-				if(nombreColonnes != st.countTokens()) {
-					throw new ReqException("Le nombre de colonne ne correspond pas au nombre de types de colonnes");
-				}
-				
-				
-				for(int i = 0; i<nombreColonnes && st.hasMoreTokens(); i++) {
-					typesDesColonnes.add(st.nextToken());
-				}
-				
-				System.out.println(nomRelation);
-				System.out.println(nombreColonnes);
-				System.out.println(typesDesColonnes);
-				createRelation(nomRelation, nombreColonnes, typesDesColonnes);
-				break;
-			case "insert":
-				nomRelation = st.nextToken();
-				ArrayList<String> contenuDesColonnes = new ArrayList<>();
-				for(int i = 0; st.hasMoreTokens(); i++) {
-					contenuDesColonnes.add(st.nextToken());
-				}
-				// Aucune gestion d'erreur, comme demande dans la consigne
-				break;
-			case "fill":
-				nomRelation = st.nextToken();
-				String nom_fichier = st.nextToken();
-				fill(nomRelation, nom_fichier);
-				break;
-			case "selectall":
-				nomRelation = st.nextToken();
-				selectAll(nomRelation);
-				break;
-			case "select":
-				nomRelation = st.nextToken();
-				int indexColonne;
-				try{
-					indexColonne = Integer.parseInt(st.nextToken());
-				} catch (Exception e){
-					throw new ReqException("Le numero de colonne n'est pas écrit correctement");
-				}
-				select(nomRelation, indexColonne, st.nextToken());
-				break;
-			case "debug": /// /// commande de debug poour tester des fonctions du SGBD /// ///
-				switch(st.nextToken()){
-					case "createfile": /// /// commande qui cree une fichier vide dans le classpath /// ///
-						String nomFichier = st.nextToken();
-						File fichier = new File(Constantes.pathName + nomFichier);
-						try {
-							fichier.createNewFile();
-						} catch (IOException e) {
-							throw new SGBDException("impossible de creer un fichier dans "+ Constantes.pathName);
-						}
-						break;
-					default:
-						break;
+
+		switch (action) {
+		case "create":
+			int nombreColonnes = 0;
+			ArrayList<String> typesDesColonnes = new ArrayList<>();
+
+			nomRelation = st.nextToken();
+
+			try { // On regarde si le nombre de colonnes indique est bien un nombre
+				nombreColonnes = Integer.parseInt(st.nextToken());
+			} catch (Exception e) { // si non, on lance une exception
+				throw new ReqException("Le nombre de colonnes n'est pas un entier");
+			}
+
+			if (nombreColonnes != st.countTokens()) {
+				throw new ReqException("Le nombre de colonne ne correspond pas au nombre de types de colonnes");
+			}
+
+			for (int i = 0; i < nombreColonnes && st.hasMoreTokens(); i++) {
+				typesDesColonnes.add(st.nextToken());
+			}
+
+			System.out.println(nomRelation);
+			System.out.println(nombreColonnes);
+			System.out.println(typesDesColonnes);
+			createRelation(nomRelation, nombreColonnes, typesDesColonnes);
+			break;
+		case "insert":
+			nomRelation = st.nextToken();
+			ArrayList<String> contenuDesColonnes = new ArrayList<>();
+			for (int i = 0; st.hasMoreTokens(); i++) {
+				contenuDesColonnes.add(st.nextToken());
+			}
+			// Aucune gestion d'erreur, comme demande dans la consigne
+			break;
+		case "fill":
+			nomRelation = st.nextToken();
+			String nom_fichier = st.nextToken();
+			fill(nomRelation, nom_fichier);
+			break;
+		case "selectall":
+			nomRelation = st.nextToken();
+			selectAll(nomRelation);
+			break;
+		case "select":
+			nomRelation = st.nextToken();
+			int indexColonne;
+			try {
+				indexColonne = Integer.parseInt(st.nextToken());
+			} catch (Exception e) {
+				throw new ReqException("Le numero de colonne n'est pas écrit correctement");
+			}
+			select(nomRelation, indexColonne, st.nextToken());
+			break;
+		case "debug": /// /// commande de debug poour tester des fonctions du SGBD /// ///
+			switch (st.nextToken()) {
+			case "createfile": /// /// commande qui cree une fichier vide dans le classpath /// ///
+				String nomFichier = st.nextToken();
+				File fichier = new File(Constantes.pathName + nomFichier);
+				try {
+					fichier.createNewFile();
+				} catch (IOException e) {
+					throw new SGBDException("impossible de creer un fichier dans " + Constantes.pathName);
 				}
 				break;
 			default:
-				throw new ReqException("Commande inconnue");
+				break;
+			}
+			break;
+		default:
+			throw new ReqException("Commande inconnue");
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Fonction de debug
 	 */
 	public void afficher() {
 		/*
-		System.out.println(dbDef.getCompteurRel());
-		System.out.println(dbDef.getListeDeRelDef());
-		System.out.println(dbDef.getInstance());
-		*/
-		
-	}
-	
-	public void finish() {
-		
+		 * System.out.println(dbDef.getCompteurRel());
+		 * System.out.println(dbDef.getListeDeRelDef());
+		 * System.out.println(dbDef.getInstance());
+		 */
+
 	}
 
-	/** methode privee pour afficher proprement une liste de records
+	public void finish() {
+
+	}
+
+	/**
+	 * methode privee pour afficher proprement une liste de records
 	 *
-	 * @param listeRecords (la liste des records)
+	 * @param listeRecords
+	 *            (la liste des records)
 	 */
-	private void affichageRecords(ArrayList<Record> listeRecords){
+	private void affichageRecords(ArrayList<Record> listeRecords) {
 		int nbRecords = 0;
-		for(int i = 0; i<listeRecords.size(); i++){
+		for (int i = 0; i < listeRecords.size(); i++) {
 			ArrayList<String> record = listeRecords.get(i).getValues();
-			for(int j = 0;j<record.size(); j++){
+			for (int j = 0; j < record.size(); j++) {
 				System.out.print(record.get(j) + " ");
 			}
 			nbRecords++;
@@ -141,51 +143,62 @@ public class DBManager {
 		System.out.println("Total records : " + nbRecords);
 	}
 
-	/** methode qui affiche tous les tuples dont la valeur de la colonne n°indexColonne est egale a valeurColonne
+	/**
+	 * methode qui affiche tous les tuples dont la valeur de la colonne
+	 * n°indexColonne est egale a valeurColonne
 	 *
-	 * @param nomRelation (nom de la relation)
-	 * @param indexColonne (numero de la colonne qu on veut filtrer)
-	 * @param valeurColonne (valeur du filtre)
+	 * @param nomRelation
+	 *            (nom de la relation)
+	 * @param indexColonne
+	 *            (numero de la colonne qu on veut filtrer)
+	 * @param string
+	 *            (valeur du filtre)
 	 * @throws SGBDException
 	 * @throws ReqException
 	 */
-	public void select(String nomRelation, int indexColonne, String valeurColonne) throws SGBDException, ReqException {
-		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecordsWithFilter(nomRelation, indexColonne, valeurColonne);
+	public void select(String nomRelation, int indexColonne, String string) throws SGBDException, ReqException {
+		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecordsWithFilter(nomRelation, indexColonne,
+				string);
 		affichageRecords(listeRecords);
 	}
 
-	/** methode qui affiche tous les tuples d'une relation puis le nb le tuples affiches
+	/**
+	 * methode qui affiche tous les tuples d'une relation puis le nb le tuples
+	 * affiches
 	 *
-	 * @param nomRelation (nom de la relation)
+	 * @param nomRelation
+	 *            (nom de la relation)
 	 */
 	public void selectAll(String nomRelation) throws SGBDException {
 		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecords(nomRelation);
 		affichageRecords(listeRecords);
 	}
 
-	/** methode pour insérer des tuples dans une relation à partir d'un fichier
+	/**
+	 * methode pour insérer des tuples dans une relation à partir d'un fichier
 	 *
-	 * @param nomRelation (le nom de la relation)
-	 * @param nomFichier (nom du fichier contenant les tuples)
+	 * @param nomRelation
+	 *            (le nom de la relation)
+	 * @param nomFichier
+	 *            (nom du fichier contenant les tuples)
 	 * @throws SGBDException
 	 */
 	public void fill(String nomRelation, String nomFichier) throws SGBDException {
 		File fichier = new File(nomFichier);
-		if(!fichier.exists()){
+		if (!fichier.exists()) {
 			throw new SGBDException("le fichier que vous demandez n'existe pas");
 		}
-		try(
-				FileInputStream is = new FileInputStream(fichier);
-				InputStreamReader isr = new InputStreamReader(is, "UTF-8")){
+		try (FileInputStream is = new FileInputStream(fichier);
+				InputStreamReader isr = new InputStreamReader(is, "UTF-8")) {
 			StringBuffer sb = new StringBuffer();
-			for(int i = 0; i<fichier.length(); i++){
+			for (int i = 0; i < fichier.length(); i++) {
 				sb.append((char) isr.read());
 			}
 			StringTokenizer stFile = new StringTokenizer(sb.toString(), "\n");
-			while(stFile.hasMoreTokens()){
+			while (stFile.hasMoreTokens()) {
 				StringTokenizer stRow = new StringTokenizer(stFile.nextToken(), ",");
 				ArrayList<String> contenuDesColonnes = new ArrayList<>();
-				while(stRow.hasMoreTokens()){
+				while (stRow.hasMoreTokens()) {
 					contenuDesColonnes.add(stRow.nextToken());
 				}
 				Record record = new Record();
@@ -194,16 +207,19 @@ public class DBManager {
 			}
 		} catch (IOException e) {
 			throw new SGBDException("Impossible de lire le fichier fourni: " + e.getMessage());
-		} catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new SGBDException("Erreur lors de l'execution de la methode fill() dans DBManager");
 		}
 	}
 
-	/** la fonction pour inserer un tuple dans une relation
+	/**
+	 * la fonction pour inserer un tuple dans une relation
 	 *
-	 * @param nomRelation (nom de la relation)
-	 * @param contenuDesColonnes (contenu du tuple)
+	 * @param nomRelation
+	 *            (nom de la relation)
+	 * @param contenuDesColonnes
+	 *            (contenu du tuple)
 	 */
 	public void insertRecord(String nomRelation, ArrayList<String> contenuDesColonnes) throws SGBDException {
 		Record record = new Record();
@@ -211,51 +227,57 @@ public class DBManager {
 		FileManager.getInstance().insertRecordInRelation(nomRelation, record);
 
 	}
-	
-	/** la fonction pour creer la relation
-	 * 
-	 * @param nomRelation (nom de la relation)
-	 * @param nombreColonnes (le nombre de colonnes)
-	 * @param typesDesColonnes (un tableau avec le types de chaque colonnes)
-	 */
-	public void createRelation (String nomRelation, int nombreColonnes, ArrayList<String>typesDesColonnes) throws ReqException {
 
+	/**
+	 * la fonction pour creer la relation
+	 * 
+	 * @param nomRelation
+	 *            (nom de la relation)
+	 * @param nombreColonnes
+	 *            (le nombre de colonnes)
+	 * @param typesDesColonnes
+	 *            (un tableau avec le types de chaque colonnes)
+	 */
+	public void createRelation(String nomRelation, int nombreColonnes, ArrayList<String> typesDesColonnes)
+			throws ReqException {
 
 		int recordSize = 0;
-		for(int i = 0; i<typesDesColonnes.size(); i++){
-			switch(typesDesColonnes.get(i)){
-				case "int":
-					recordSize += Constantes.recordSize_int;
-					break;
-				case "float":
-					recordSize += Constantes.recordSize_float;
-					break;
-				default:
-					if(typesDesColonnes.get(i).substring(0, 5).equals("string")){
-						try{
-							int nb_chiffres = 0; // compteur qui va compter le nombre de chiffres dans le nombre
-							for(int j = 0; j<4; j++){
-								try{
-									Integer.parseInt(typesDesColonnes.get(i).substring(6+j));
-									nb_chiffres++;
-								}catch(Exception e){
-									// rien a faire, ça veut juste dire qu'il n'y a pas plus de 3 chiffres dans x
-								}
+		for (int i = 0; i < typesDesColonnes.size(); i++) {
+			switch (typesDesColonnes.get(i)) {
+			case "int":
+				recordSize += Constantes.recordSize_int;
+				break;
+			case "float":
+				recordSize += Constantes.recordSize_float;
+				break;
+			default:
+				if (typesDesColonnes.get(i).substring(0, 5).equals("string")) {
+					try {
+						int nb_chiffres = 0; // compteur qui va compter le nombre de chiffres dans le nombre
+						for (int j = 0; j < 4; j++) {
+							try {
+								Integer.parseInt(typesDesColonnes.get(i).substring(6 + j));
+								nb_chiffres++;
+							} catch (Exception e) {
+								// rien a faire, ça veut juste dire qu'il n'y a pas plus de 3 chiffres dans x
 							}
-							int x = Integer.parseInt(typesDesColonnes.get(i).substring(6, 6+nb_chiffres));
-							if(x <= 1000 && x>0){
-								recordSize += x * Constantes.recordSize_stringx;
-							} else {
-								throw new ReqException("La taille d'une colonne de type string est incorrecte (min: 1, max: 1000)");
-							}
-						} catch (Exception e){
-							throw new ReqException("Une colonne de type string est mal declaree");
 						}
+						int x = Integer.parseInt(typesDesColonnes.get(i).substring(6, 6 + nb_chiffres));
+						if (x <= 1000 && x > 0) {
+							recordSize += x * Constantes.recordSize_stringx;
+						} else {
+							throw new ReqException(
+									"La taille d'une colonne de type string est incorrecte (min: 1, max: 1000)");
+						}
+					} catch (Exception e) {
+						throw new ReqException("Une colonne de type string est mal declaree");
 					}
+				}
 			}
 		}
-		if(Constantes.pageSize / recordSize == 0){
-			throw new ReqException("La relation que vous tentez de creer prend trop de place par rapport a la taille max d'une page");
+		if (Constantes.pageSize / recordSize == 0) {
+			throw new ReqException(
+					"La relation que vous tentez de creer prend trop de place par rapport a la taille max d'une page");
 		}
 
 		RelDef relation = new RelDef();
