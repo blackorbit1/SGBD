@@ -62,4 +62,12 @@ public class RelDef { // === === Classes pour une relation === ===
 		return fileIdx;
 	}
 
+	public static int getCompteurDeRelDef() {
+		return compteurDeRelDef;
+	}
+
+	public static void setCompteurDeRelDef(int compteurDeRelDef) {
+		RelDef.compteurDeRelDef = compteurDeRelDef;
+	}
+
 }

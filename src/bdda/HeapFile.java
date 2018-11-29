@@ -103,7 +103,8 @@ public class HeapFile {
 	 * actualise les informations dans la Header Page suite a l’occupation d’une des
 	 * cases disponible sur une page
 	 * 
-	 * @param iPageId de la page a modifier
+	 * @param iPageId
+	 *            de la page a modifier
 	 * @throws SGBDException
 	 */
 	private void updateHeaderWithTakenSlot(PageId iPageId) throws SGBDException {
@@ -276,7 +277,6 @@ public class HeapFile {
 			return listPageId;
 
 		} catch (SGBDException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
