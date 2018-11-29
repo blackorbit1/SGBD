@@ -74,6 +74,20 @@ public class DBManager {
 				String nom_fichier = st.nextToken();
 				fill(nomRelation, nom_fichier);
 				break;
+			case "selectall":
+				nomRelation = st.nextToken();
+				selectAll(nomRelation);
+				break;
+			case "select":
+				nomRelation = st.nextToken();
+				int indexColonne;
+				try{
+					indexColonne = Integer.parseInt(st.nextToken());
+				} catch (Exception e){
+					throw new ReqException("Le numero de colonne n'est pas écrit correctement");
+				}
+				select(nomRelation, indexColonne, st.nextToken());
+				break;
 			case "debug": /// /// commande de debug poour tester des fonctions du SGBD /// ///
 				switch(st.nextToken()){
 					case "createfile": /// /// commande qui cree une fichier vide dans le classpath /// ///
@@ -110,25 +124,79 @@ public class DBManager {
 		
 	}
 
+	/** methode privee pour afficher proprement une liste de records
+	 *
+	 * @param listeRecords (la liste des records)
+	 */
+	private void affichageRecords(ArrayList<Record> listeRecords){
+		int nbRecords = 0;
+		for(int i = 0; i<listeRecords.size(); i++){
+			ArrayList<String> record = listeRecords.get(i).getValues();
+			for(int j = 0;j<record.size(); j++){
+				System.out.print(record.get(j) + " ");
+			}
+			nbRecords++;
+			System.out.println();
+		}
+		System.out.println("Total records : " + nbRecords);
+	}
+
+	/** methode qui affiche tous les tuples dont la valeur de la colonne n°indexColonne est egale a valeurColonne
+	 *
+	 * @param nomRelation (nom de la relation)
+	 * @param indexColonne (numero de la colonne qu on veut filtrer)
+	 * @param valeurColonne (valeur du filtre)
+	 * @throws SGBDException
+	 * @throws ReqException
+	 */
+	public void select(String nomRelation, int indexColonne, String valeurColonne) throws SGBDException, ReqException {
+		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecordsWithFilter(nomRelation, indexColonne, valeurColonne);
+		affichageRecords(listeRecords);
+	}
+
+	/** methode qui affiche tous les tuples d'une relation puis le nb le tuples affiches
+	 *
+	 * @param nomRelation (nom de la relation)
+	 */
+	public void selectAll(String nomRelation) throws SGBDException {
+		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecords(nomRelation);
+		affichageRecords(listeRecords);
+	}
+
+	/** methode pour insérer des tuples dans une relation à partir d'un fichier
+	 *
+	 * @param nomRelation (le nom de la relation)
+	 * @param nomFichier (nom du fichier contenant les tuples)
+	 * @throws SGBDException
+	 */
 	public void fill(String nomRelation, String nomFichier) throws SGBDException {
-		File fichier = new File(Constantes.pathName + nomFichier);
+		File fichier = new File(nomFichier);
 		if(!fichier.exists()){
 			throw new SGBDException("le fichier que vous demandez n'existe pas");
 		}
 		try(
 				FileInputStream is = new FileInputStream(fichier);
-				DataInputStream dis = new DataInputStream(is)){
-			System.out.println(dis.readLine());
-			System.out.println(dis.readLine());
-			System.out.println(dis.readLine());
-			StringTokenizer stFile = new StringTokenizer(dis.readLine(), "\n");
-			while(stFile.countTokens() > 0){
+				InputStreamReader isr = new InputStreamReader(is, "UTF-8")){
+			StringBuffer sb = new StringBuffer();
+			for(int i = 0; i<fichier.length(); i++){
+				sb.append((char) isr.read());
+			}
+			StringTokenizer stFile = new StringTokenizer(sb.toString(), "\n");
+			while(stFile.hasMoreTokens()){
 				StringTokenizer stRow = new StringTokenizer(stFile.nextToken(), ",");
-				System.out.println(stRow.toString());
+				ArrayList<String> contenuDesColonnes = new ArrayList<>();
+				while(stRow.hasMoreTokens()){
+					contenuDesColonnes.add(stRow.nextToken());
+				}
+				Record record = new Record();
+				record.setValues(contenuDesColonnes);
+				FileManager.getInstance().insertRecordInRelation(nomRelation, record);
 			}
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			throw new SGBDException("impossible de lire le fichier fourni");
+			throw new SGBDException("Impossible de lire le fichier fourni: " + e.getMessage());
+		} catch (Exception e){
+			e.printStackTrace();
+			throw new SGBDException("Erreur lors de l'execution de la methode fill() dans DBManager");
 		}
 	}
 
@@ -137,7 +205,7 @@ public class DBManager {
 	 * @param nomRelation (nom de la relation)
 	 * @param contenuDesColonnes (contenu du tuple)
 	 */
-	public void insertRecord(String nomRelation, ArrayList<String> contenuDesColonnes){
+	public void insertRecord(String nomRelation, ArrayList<String> contenuDesColonnes) throws SGBDException {
 		Record record = new Record();
 		record.setValues(contenuDesColonnes);
 		FileManager.getInstance().insertRecordInRelation(nomRelation, record);

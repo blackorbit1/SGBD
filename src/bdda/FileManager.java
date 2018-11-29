@@ -9,7 +9,7 @@ import exception.SGBDException;
 
 public class FileManager {
 
-	private List<HeapFile> listeHeapFiles;
+	private List<HeapFile> listeHeapFiles = new ArrayList<>();
 	private static final FileManager fileManager = new FileManager();
 
 	private FileManager() {
@@ -39,6 +39,23 @@ public class FileManager {
 
 	}
 
+	public ArrayList<Record> getAllRecords(String iRelationName) throws SGBDException{
+		// code
+		//
+		//  /!\ ne pas oublier de throw une SGBDException si la relation demandée ne se trouve pas dans la listeHeapFiles
+		//
+		return new ArrayList<Record>();
+	}
+
+	public ArrayList<Record> getAllRecordsWithFilter(String iRelationName, int iIdxCol, String iValeur) throws SGBDException, ReqException{
+		// code
+		//
+		//  /!\ ne pas oublier de throw une SGBDException si la relation demandée ne se trouve pas dans la listeHeapFiles
+		// 	/!\ ne pas oublier de throw une ReqException si la iValeur en argument est de type différent de celui de la colonne demandée
+		//
+		return new ArrayList<Record>();
+	}
+
 	/**
 	 * fonction pour utiliser la methode insertRecord() du HeapFile correspondant a
 	 * la relation en question
@@ -49,15 +66,22 @@ public class FileManager {
 	 *            (le contenu du tuple a ajouter)
 	 * @return (l'ID du tuple ajoute)
 	 */
-	Rid insertRecordInRelation(String iRelationName, Record iRecord) {
+	Rid insertRecordInRelation(String iRelationName, Record iRecord) throws SGBDException {
 		// parcourir la liste des HeapFiles pour trouver celui qui correspond a la
 		// relation en question, et ensuite appeler sa propre methode InsertRecord
 		Rid rid = null;
+		boolean found = false;
 		for (int i = 0; i < listeHeapFiles.size(); i++) {
 			if (listeHeapFiles.get(i).getPointeur().getNom().equals(iRelationName)) {
 				rid = listeHeapFiles.get(i).insertRecord(iRecord);
+				found = true;
 			}
 		}
-		return rid;
+		if(found){
+			return rid;
+		} else {
+			throw new SGBDException("La relation dans laquelle vous voulez insérer votre tuple n'est pas dans la liste des HeapFiles");
+		}
+
 	}
 }
