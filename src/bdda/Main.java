@@ -32,7 +32,7 @@ public class Main {
 			} catch (SGBDException e) {
 				System.out.println(e.getMessage());
 			} catch (Exception e) {
-				System.out.println("bonjour");
+				e.printStackTrace();
 			}
 
 		} while (!commande.equals("exit"));

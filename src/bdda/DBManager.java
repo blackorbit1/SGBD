@@ -188,7 +188,7 @@ public class DBManager {
 		if (!fichier.exists()) {
 			throw new SGBDException("le fichier que vous demandez n'existe pas");
 		}
-		try (FileInputStream is = new FileInputStream(fichier);
+		try (   FileInputStream is = new FileInputStream(fichier);
 				InputStreamReader isr = new InputStreamReader(is, "UTF-8")) {
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < fichier.length(); i++) {

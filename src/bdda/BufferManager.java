@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class BufferManager {
-    private ArrayList<Frame> frames = new ArrayList<>();
+    private ArrayList<Frame> frames;
 
     //Pour avoir une unique instance de BufferManager
     private static final BufferManager instance = new BufferManager();
@@ -41,7 +41,9 @@ public class BufferManager {
 
         // On verifie si la page est pas deja dans une frame de notre tableau
         for(int i = 0; i<frames.size();i++){
-            if(frames.get(i).getPageId().getPageIdx() == iPageId.getPageIdx()){
+            if(frames.get(i).getPageId() == null) {
+                // TODO que faire si il y a une frame mais sans PageID ?
+            } else if(frames.get(i).getPageId().getPageIdx() == iPageId.getPageIdx()){
                 return(frames.get(i).getContent());
             }
         }
