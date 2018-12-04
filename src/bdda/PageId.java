@@ -1,32 +1,32 @@
 package bdda;
 
 public class PageId {
-	private int FileIdx;
-	private int PageIdx;
+	private int fileIdx;
+	private int pageIdx;
 
-	public PageId(int FileId, int PageId) {
-		this.FileIdx = FileId;
-		this.PageIdx = PageId;
+	public PageId(int fileId, int pageId) {
+		this.fileIdx = fileId;
+		this.pageIdx = pageId;
 	}
 
 	public PageId() {
-		this.FileIdx = 0;
-		this.PageIdx = 0;
+		this.fileIdx = 0;
+		this.pageIdx = 0;
 	}
 
 	public int getFileIdx() {
-		return FileIdx;
+		return fileIdx;
 	}
 
 	public void setFileIdx(int fileIdx) {
-		FileIdx = fileIdx;
+		this.fileIdx = fileIdx;
 	}
 
 	public int getPageIdx() {
-		return PageIdx;
+		return pageIdx;
 	}
 
 	public void setPageIdx(int pageIdx) {
-		PageIdx = pageIdx;
+		this.pageIdx = pageIdx;
 	}
 }

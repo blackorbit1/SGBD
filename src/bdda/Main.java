@@ -25,7 +25,6 @@ public class Main {
 					db.processCommand(commande);
 					break;
 				}
-				sc.close();
 				db.afficher();
 			} catch (ReqException e) {
 				System.out.println(e.getMessage());

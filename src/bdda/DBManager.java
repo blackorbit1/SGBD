@@ -56,9 +56,9 @@ public class DBManager {
 				typesDesColonnes.add(st.nextToken());
 			}
 
-			System.out.println(nomRelation);
-			System.out.println(nombreColonnes);
-			System.out.println(typesDesColonnes);
+			//System.out.println(nomRelation);
+			//System.out.println(nombreColonnes);
+			//System.out.println(typesDesColonnes);
 			createRelation(nomRelation, nombreColonnes, typesDesColonnes);
 			break;
 		case "insert":

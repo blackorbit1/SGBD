@@ -31,9 +31,11 @@ public class FileManager {
 	public void createNewHeapFile(RelDef iRelDel) {
 		HeapFile heapFile = new HeapFile();
 		heapFile.setPointeur(iRelDel);
+		listeHeapFiles.add(heapFile); // TODO j'ai ajouté ça (Enzo)
 		try {
 			heapFile.createNewOnDisk();
 		} catch (IOException | ReqException | SGBDException e) {
+			//TODO ça c'est un peu bof bof x)
 			e.printStackTrace();
 		}
 
@@ -54,7 +56,9 @@ public class FileManager {
 		// relation en question, et ensuite appeler sa propre methode InsertRecord
 		Rid rid = null;
 		boolean found = false;
+		//System.out.println(listeHeapFiles.size());
 		for (int i = 0; i < listeHeapFiles.size(); i++) {
+			//System.out.println(listeHeapFiles.get(i).getPointeur().getNom());
 			if (listeHeapFiles.get(i).getPointeur().getNom().equals(iRelationName)) {
 				rid = listeHeapFiles.get(i).insertRecord(iRecord);
 				found = true;
@@ -63,8 +67,7 @@ public class FileManager {
 		if (found) {
 			return rid;
 		} else {
-			throw new SGBDException(
-					"La relation dans laquelle vous voulez insérer votre tuple n'est pas dans la liste des HeapFiles");
+			throw new SGBDException("La relation dans laquelle vous voulez insérer votre tuple n'est pas dans la liste des HeapFiles");
 		}
 
 	}
