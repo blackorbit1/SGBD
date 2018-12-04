@@ -12,6 +12,11 @@ public class HeaderPageInfo {
 		return dataPageCount;
 	}
 
+	public void addDataPage(DataPage d) {
+		this.listePages.add(d);
+		dataPageCount++;
+	}
+
 	public void setDataPageCount(int dataPageCount) {
 		this.dataPageCount = dataPageCount;
 	}
@@ -22,6 +27,7 @@ public class HeaderPageInfo {
 
 	public void setListePages(ArrayList<DataPage> listePages) {
 		this.listePages = listePages;
+		this.dataPageCount += listePages.size();
 	}
 
 	public HeaderPageInfo() {
