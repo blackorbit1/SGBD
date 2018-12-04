@@ -153,6 +153,8 @@ public class BufferManager {
             } else if(frames.get(i).getPageId().getPageIdx() == pageId.getPageIdx()) {
                 if (frames.get(i).getPin_count() > 0) { // Si pin_count est superieur a 0, on le decremente
                     frames.get(i).setPin_count(frames.get(i).getPin_count() - 1);
+                } else if(frames.get(i).getPin_count() == 0){
+                    throw new SGBDException("Le pin_count de la " + i + "e frame doit etre décrémenté alors qu'il est déjà nul");
                 }
                 frames.get(i).setDirty(iIsDirty);
             }
