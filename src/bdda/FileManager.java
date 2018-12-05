@@ -61,6 +61,7 @@ public class FileManager {
 			//System.out.println(listeHeapFiles.get(i).getPointeur().getNom());
 			if (listeHeapFiles.get(i).getPointeur().getNom().equals(iRelationName)) {
 				rid = listeHeapFiles.get(i).insertRecord(iRecord);
+                System.out.println("Insertion dans la relation : " + iRelationName + " ID: "+ rid.getPageId().getFileIdx() +" page  n°: "+ rid.getPageId().getPageIdx() + " slot n°: " + rid.getSlotIdx() );
 				found = true;
 			}
 		}

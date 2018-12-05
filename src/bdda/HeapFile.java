@@ -77,7 +77,7 @@ public class HeapFile {
 				PageId newpid = new PageId();
 				DiskManager.getInstance().addPage(pointeur.getFileIdx(), newpid);
 				oPageId.setPageIdx(newpid.getPageIdx());
-				headerPageI.getListePages().add(new DataPage(oPageId.getPageIdx(), pointeur.getSlotCount()));
+				headerPageI.addDataPage(new DataPage(oPageId.getPageIdx(), pointeur.getSlotCount()));
 
 				headerPageI.writeToBuffer(bufferHeaderPage);
 				BufferManager.getInstance().freePage(headerpage, true);
@@ -193,7 +193,8 @@ public class HeapFile {
 			bufferPage.position(0);
 			int slotId = 0;
 			for (int i = 0; i < pointeur.getSlotCount(); i++) {
-				if (bufferPage.get() == 0) {
+				// TODO Modification ici
+				if (bufferPage.get(i) == 0) {
 					slotId = i;
 					writeRecordInBuffer(iRecord, bufferPage, i);
 					bufferPage.position(i);
@@ -209,6 +210,7 @@ public class HeapFile {
 			return new Rid(iPageId, slotId);
 
 		} catch (SGBDException e) {
+			e.printStackTrace();
 			throw new SGBDException("Erreur d'insertion du record : pas de place libre sur la page");
 		}
 
@@ -247,7 +249,7 @@ public class HeapFile {
 			ByteBuffer bfPage = BufferManager.getInstance().getPage(iPageId);
 			bfPage.position(0);
 			for (int i = 0; i < pointeur.getSlotCount(); i++) {
-				if (bfPage.get() == 1) {
+				if (bfPage.get(i) == 1) {
 					listRecord.add(readRecordFromBuffer(bfPage, i));
 				}
 			}

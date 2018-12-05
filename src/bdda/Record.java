@@ -3,7 +3,7 @@ package bdda;
 import java.util.ArrayList;
 
 public class Record {
-	private ArrayList<String> values;
+	private ArrayList<String> values = new ArrayList<>();
 
 	public void setValues(ArrayList<String> values) {
 		this.values = values;

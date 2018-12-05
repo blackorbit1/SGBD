@@ -1,6 +1,7 @@
 package bdda;
 
 import java.io.*;
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -67,6 +68,8 @@ public class DBManager {
 			for (int i = 0; st.hasMoreTokens(); i++) {
 				contenuDesColonnes.add(st.nextToken());
 			}
+
+			insertRecord(nomRelation, contenuDesColonnes);
 			// Aucune gestion d'erreur, comme demande dans la consigne
 			break;
 		case "fill":
@@ -99,6 +102,25 @@ public class DBManager {
 					throw new SGBDException("impossible de creer un fichier dans " + Constantes.pathName);
 				}
 				break;
+			case "framelist": /// /// commande pour afficher la liste des frames /// ///
+			    ArrayList<Frame> liste = BufferManager.getInstance().getFrames();
+			    for(int i=0; i<liste.size(); i++){
+			        try{
+                        System.out.println("--- --- ---");
+                        System.out.println("Pointeur Frame  : " + liste.get(i).toString());
+                        System.out.println("Pointeur PageId : " + liste.get(i).getPageId().toString());
+                        System.out.println("Page Idx        : " + liste.get(i).getPageId().getPageIdx());
+                        System.out.println("pin_count       : " + liste.get(i).getPin_count());
+                        System.out.println("date unpinned   : " + liste.get(i).getUnpinned().getTime());
+                        System.out.println("isDirty         : " + liste.get(i).isDirty());
+                        System.out.println("content         : " + liste.get(i).getContent().getInt());
+                        System.out.println("--- --- ---");
+
+                    } catch(Exception e){
+                        System.out.println("probleme lors de l'affichage d'une frame");
+                    }
+                }
+                break;
 			default:
 				break;
 			}

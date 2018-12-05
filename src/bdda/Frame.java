@@ -13,7 +13,12 @@ public class Frame {
     public Frame(PageId pageid){
         this.pageId = pageid;
         this.dirty = false;
+        this.unpinned = new Date();
         this.pin_count = 1; // Car si on vient de la creer, y a forcément 1 personne qui travaille dessus
+    }
+
+    public void incrementerPinCount(){
+        pin_count++;
     }
 
     // Getter

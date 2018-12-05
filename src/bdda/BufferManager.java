@@ -26,6 +26,13 @@ public class BufferManager {
         return instance;
     }
 
+    /** Methode creee pour comprendre ce qu'il se passe et corriger des bugs
+     *
+     * @return (liste de toutes les frames)
+     */
+    public ArrayList<Frame> getFrames() {
+        return frames;
+    }
 
     // il faut toujours incrementer le pin_count
 
@@ -43,9 +50,9 @@ public class BufferManager {
         for(int i = 0; i<frames.size();i++){
             if(frames.get(i).getPageId() == null) {
                 // si la frame ne contient pas de page, on passe
-            } else if(frames.get(i).getPageId().getPageIdx() == iPageId.getPageIdx()){
+            } else if(frames.get(i).getPageId().getPageIdx() == iPageId.getPageIdx() && frames.get(i).getPageId().getFileIdx() == iPageId.getFileIdx()){
                 //System.out.println("La page est déjà dans une frame");
-                // TODO est ce qu'il ne faut pas incrémenter le pin_count de la page ?
+                frames.get(i).incrementerPinCount();
                 return(frames.get(i).getContent());
             }
         }
@@ -58,15 +65,16 @@ public class BufferManager {
         int indexPlace = 0;
         boolean isPlein = true;
 
-        for(int i = 0; i<frames.size(); i++){
+        for(int i = 0; i<frames.size() && isPlein; i++){
             if(frames.get(i).getContent() == null){
+                System.out.println("on va remplacer la frame n°"+ i);
                 indexPlace = i;
                 isPlein = false;
             }
         }
 
         if(!isPlein){ // Si il reste de la place
-            //System.out.println("Il reste de la place");
+            System.out.println("Il reste de la place");
             // On cree une instance de ByteBuffer
             ByteBuffer bf = ByteBuffer.allocateDirect(Constantes.pageSize);
 
@@ -81,17 +89,20 @@ public class BufferManager {
             // On met le contenu de la page demandee dans la frame
             frames.get(indexPlace).setContent(bf);
             frames.get(indexPlace).setPageId(iPageId);
+            frames.get(indexPlace).incrementerPinCount();
 
 
             return bf;
         } else {
-            //System.out.println("Il ne reste pas de place");
+            System.out.println("Il ne reste pas de place, remplacement d'une page");
             int indexOldestDate = 0; // l'index de la frame dont le pin count est passe a 0 le moins recemment
             Date oldestDate = new Date(); // la date de la frame dont le pin count est passe a 0 le moins recemment
 
             // On cherche la frame dont le pin count est passe a 0 le moins recemment
             for(int i = 0; i<frames.size(); i++){
-                if(frames.get(i).getUnpinned().getTime() < oldestDate.getTime()){
+                if(frames.get(i).getPageId() == null) {
+                    // si on est sur une frame vide, on passe
+                } else if(frames.get(i).getUnpinned().getTime() < oldestDate.getTime()){
                     indexOldestDate = i;
                     oldestDate = frames.get(i).getUnpinned();
                     // On enregistre les modifications faites a la page associee a la frame qu'on va utiliser pour notre nouvelle page
@@ -150,7 +161,7 @@ public class BufferManager {
         for(int i = 0; i<frames.size(); i++){
             if(frames.get(i).getPageId() == null) {
                 // si on est sur une frame vide, on passe
-            } else if(frames.get(i).getPageId().getPageIdx() == pageId.getPageIdx()) {
+            } else if(frames.get(i).getPageId().getPageIdx() == pageId.getPageIdx() && frames.get(i).getPageId().getFileIdx() == pageId.getFileIdx()) {
                 if (frames.get(i).getPin_count() > 0) { // Si pin_count est superieur a 0, on le decremente
                     frames.get(i).setPin_count(frames.get(i).getPin_count() - 1);
                 } else if(frames.get(i).getPin_count() == 0){
