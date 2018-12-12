@@ -12,6 +12,7 @@ import exception.SGBDException;
 public class DiskManager {
 
 	private static final DiskManager diskManager = new DiskManager();
+	private ByteBuffer data;
 
 	private DiskManager() {
 	}
@@ -72,13 +73,13 @@ public class DiskManager {
 			// long position = ((rf.length() / Constantes.pageSize);
 
 			// seek permet de connaitre la derniere position du fichier
-			
-			oPageId.setPageIdx((int) (rf.length() / Constantes.pageSize));
 			rf.seek(rf.length());
+
 			// On ecrit le contenu du buffer
 			rf.write(bf.array());
+
 			oPageId.setFileIdx(iFileIdx);
-			rf.close();
+			oPageId.setPageIdx((int) (rf.length() / Constantes.pageSize));
 		}
 
 	}
@@ -99,8 +100,8 @@ public class DiskManager {
 			fc.position(position);
 			iBuffer.clear();
 			fc.read(iBuffer);
+
 			fc.close();
-			readFile.close();
 		}
 
 	}
@@ -122,9 +123,11 @@ public class DiskManager {
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
 			oBuffer.flip();
-			fc.write(oBuffer);
+
+			while (oBuffer.hasRemaining()) {
+				fc.write(oBuffer);
+			}
 			fc.close();
-			writeFile.close();
 		}
 	}
 
