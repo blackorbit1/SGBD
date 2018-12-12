@@ -18,27 +18,42 @@ class DiskManagerTest {
 	void test() {
 		DiskManager dm = DiskManager.getInstance();
 		try {
-			dm.createFile(2);
+			dm.createFile(11);
 
 			PageId pid = new PageId();
 			PageId pid2 = new PageId();
-			PageId pid3 = new PageId();
 
-			dm.addPage(2, pid);
-			dm.addPage(2, pid2);
-			dm.addPage(2, pid3);
+			dm.addPage(11, pid);
+			assertEquals(11, pid.getFileIdx());
+			assertEquals(0, pid.getPageIdx());
+			dm.addPage(11, pid2);
+			assertEquals(11, pid2.getFileIdx());
+			assertEquals(1, pid2.getPageIdx());
 
-			ByteBuffer bf = ByteBuffer.allocate(Constantes.pageSize);
+			ByteBuffer bf = ByteBuffer.allocateDirect(Constantes.pageSize);
 			while (bf.hasRemaining()) {
 				bf.putInt(1);
 			}
 
-			ByteBuffer copie = ByteBuffer.allocate(Constantes.pageSize);
+			bf.rewind();
+			while (bf.hasRemaining()) {
+				System.out.print(bf.getInt());
+			}
+
+			System.out.println();
+
+			ByteBuffer copie = ByteBuffer.allocateDirect(Constantes.pageSize);
 			dm.writePage(pid, bf);
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
 			dm.readPage(pid, copie);
 
-			while (bf.hasRemaining()) {
-				assertEquals(bf.getInt(), copie.getInt());
+			copie.rewind();
+			while (copie.hasRemaining()) {
+				System.out.print(copie.getInt());
 			}
 
 		} catch (IOException e) {
