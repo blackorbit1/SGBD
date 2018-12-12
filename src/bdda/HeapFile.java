@@ -58,6 +58,7 @@ public class HeapFile {
 	private void getFreePageId(PageId oPageId) throws SGBDException {
 		oPageId.setFileIdx(pointeur.getFileIdx());
 		try {
+			System.out.println("");
 			PageId headerpage = new PageId(pointeur.getFileIdx(), 0);
 			ByteBuffer bufferHeaderPage = BufferManager.getInstance().getPage(headerpage);
 			HeaderPageInfo headerPageI = new HeaderPageInfo();
@@ -202,11 +203,13 @@ public class HeapFile {
 					bufferPage.put((byte) 1);
 					// A verifier appel update
 					updateHeaderWithTakenSlot(iPageId);
-					BufferManager.getInstance().freePage(iPageId, true);
+
 					break;
 				}
 
 			}
+			BufferManager.getInstance().freePage(iPageId, true);
+
 			return new Rid(iPageId, slotId);
 
 		} catch (SGBDException e) {

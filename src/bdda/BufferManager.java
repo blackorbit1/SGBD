@@ -1,4 +1,4 @@
-	package bdda;
+package bdda;
 
 import exception.SGBDException;
 
@@ -18,7 +18,7 @@ public class BufferManager {
     private BufferManager() {
         this.frames = new ArrayList<Frame>();
         for(int i = 0; i<Constantes.frameCount; i++){
-            this.frames.add(new Frame(null));
+            this.frames.add(new Frame());
         }
     }
 
@@ -41,115 +41,127 @@ public class BufferManager {
      *
      * @return un des buffer qui stockent le contenu de la page
      */
-    public ByteBuffer getPage(PageId iPageId) throws SGBDException {// verifier si la page est deja chargee
-        //ByteBuffer bf = ByteBuffer.allocateDirect(Constantes.pageSize);
-        String chaine;
-
-
-        // On verifie si la page est pas deja dans une frame de notre tableau
-        for(int i = 0; i<frames.size();i++){
-            if(frames.get(i).getPageId() == null) {
-                // si la frame ne contient pas de page, on passe
-            } else if(frames.get(i).getPageId().getPageIdx() == iPageId.getPageIdx() && frames.get(i).getPageId().getFileIdx() == iPageId.getFileIdx()){
-                //System.out.println("La page est déjà dans une frame");
-                frames.get(i).incrementerPinCount();
-                return(frames.get(i).getContent());
+    public ByteBuffer getPage(PageId iPageId) throws SGBDException {
+        // on regarde si la page recherchee n'est pas déjà dans le tableau de frames
+        for(Frame frame: frames) {
+            if((frame.getPageId() != null) && (frame.getPageId().getPageIdx() == iPageId.getPageIdx()) && (frame.getPageId().getFileIdx() == iPageId.getFileIdx())){
+                frame.incrementerPinCount();
+                return frame.getContent();
             }
         }
 
-        /* Si elle l'est pas, on verifie qu'il reste de la place pour la mettre en memoire si oui c'est bon
-         * sinon on applique la politique de remplacement, on l'ajoute en memoire et on la retourne.
-         */
-
-        // On regarde si il reste de la place
-        int indexPlace = 0;
-        boolean isPlein = true;
-
-        for(int i = 0; i<frames.size() && isPlein; i++){
-            if(frames.get(i).getContent() == null){
-                System.out.println("on va remplacer la frame n°"+ i);
-                indexPlace = i;
-                isPlein = false;
+        // si non, on cherche la page dans les fichiers et on la met dans le tableau
+        // si il reste de la place
+        for(Frame frame: frames){
+            if(frame.getPageId() == null){
+                frame.setPageId(iPageId);
+                frame.incrementerPinCount();
+                try {
+                    DiskManager.getInstance().readPage(iPageId, frame.getContent());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new SGBDException("erreur d'E/S à la lecture du contenu d'une page");
+                }
+                return frame.getContent();
             }
         }
 
-        if(!isPlein){ // Si il reste de la place
-            System.out.println("Il reste de la place");
-            // On cree une instance de ByteBuffer
-            ByteBuffer bf = ByteBuffer.allocateDirect(Constantes.pageSize);
 
-            // On passe notre instance de ByteBuffer par reference pour que Diskmanager nous mette le contenu qu'il faut dedans
-            try {
-                DiskManager.getInstance().readPage(iPageId, bf);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new SGBDException("Erreur d'I/O dans la methode .readPage() de DiskManager");
+
+        // s'il n'en reste pas, LRU
+        int indexOldestDate = -1;
+        Date oldestDate = new Date();
+        /*
+        System.out.println("--- --- ---");
+        System.out.println("Demandé:");
+        System.out.println("FileID : " + iPageId.getFileIdx());
+        System.out.println("PageID : " + iPageId.getPageIdx());
+        System.out.println("--- --- ---");
+        */
+        for(int i = 0; i<frames.size(); i++){
+            /*
+            System.out.println("FileID : " + frames.get(i).getPageId().getFileIdx());
+            System.out.println("PageID : " + frames.get(i).getPageId().getPageIdx());
+            System.out.println("pin_count : " + frames.get(i).getPin_count());
+            System.out.println("unpinned frame dans le tableau: " + frames.get(i).getUnpinned().getTime());
+            System.out.println("oldest date: " + oldestDate.getTime());
+            */
+            if((frames.get(i).getPin_count() == 0) && ((indexOldestDate == -1) || (frames.get(i).getUnpinned().getTime() < oldestDate.getTime()))){
+                indexOldestDate = i;
+                oldestDate = frames.get(i).getUnpinned();
             }
+            /*
+            System.out.println("--- --- ---");
+            */
+        }
 
-            // On met le contenu de la page demandee dans la frame
-            frames.get(indexPlace).setContent(bf);
-            frames.get(indexPlace).setPageId(iPageId);
-            frames.get(indexPlace).incrementerPinCount();
-
-
-            return bf;
-        } else {
-            System.out.println("Il ne reste pas de place, remplacement d'une page");
-            int indexOldestDate = 0; // l'index de la frame dont le pin count est passe a 0 le moins recemment
-            Date oldestDate = new Date(); // la date de la frame dont le pin count est passe a 0 le moins recemment
-
-            // On cherche la frame dont le pin count est passe a 0 le moins recemment
-            for(int i = 0; i<frames.size(); i++){
-                if(frames.get(i).getPageId() == null) {
-                    // si on est sur une frame vide, on passe
-                } else if(frames.get(i).getUnpinned().getTime() < oldestDate.getTime()){
+        /*
+        int indexOldestDate = -1;
+        boolean fin = false;
+        while(true) {
+            for (int i = 0; i < Constantes.frameCount; i++) {
+                if ((this.frames.get(i).getPin_count() == 0) && (this.frames.get(i).getRef_bit() == 1)) {
+                    this.frames.get(i).setRef_bit(0);
+                    this.frames.get(i).setRef_bit(0);
+                    this.frames.get(i).setRef_bit(0);
+                    this.frames.get(i).setRef_bit(0);
+                    this.frames.get(i).setRef_bit(0);
+                    this.frames.get(i).setRef_bit(0);
+                    frames.get(i).ref_bit = 0;
+                    frames.get(i).ref_bit = 0;
+                    frames.get(i).ref_bit = 0;
+                    frames.get(i).ref_bit = 0;
+                    //System.out.println(this.frames.get(i).getRef_bit());
+                } else if ((this.frames.get(i).getPin_count() == 0) && (this.frames.get(i).getRef_bit() == 0)) {
                     indexOldestDate = i;
-                    oldestDate = frames.get(i).getUnpinned();
-                    // On enregistre les modifications faites a la page associee a la frame qu'on va utiliser pour notre nouvelle page
-                    freeFrame(i, frames.get(i).isDirty());
+                    fin = true;
+                    break;
+                } else {
+                    System.out.println("enorme erreur");
+                }
+            }
+            if(fin) break;
+            //break;
+        }
+        */
+
+
+
+        if(indexOldestDate >= 0){
+            if(frames.get(indexOldestDate).isDirty()){
+                try {
+                    DiskManager.getInstance().writePage(frames.get(indexOldestDate).getPageId(), frames.get(indexOldestDate).getContent());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new SGBDException("erreur d'E/S à l'ecriture d'une page");
                 }
             }
 
-            Frame instanceFrameTraitee = frames.get(indexOldestDate); // Creation d'un pointeur vers la frame a changer pour simplifier le code
-
-            // Installation de la nouvelle page dans la frame
-            instanceFrameTraitee.setPageId(iPageId);
-            instanceFrameTraitee.setPin_count(1);
+            frames.get(indexOldestDate).resetFrame();
+            frames.get(indexOldestDate).setPageId(iPageId);
+            frames.get(indexOldestDate).incrementerPinCount();
             try {
-                DiskManager.getInstance().readPage(iPageId, instanceFrameTraitee.getContent());
-                return instanceFrameTraitee.getContent();
+                DiskManager.getInstance().readPage(iPageId, frames.get(indexOldestDate).getContent());
             } catch (IOException e) {
                 e.printStackTrace();
-                throw new SGBDException("Erreur d'I/O dans la methode .readPage() de DiskManager");
+                throw new SGBDException("erreur d'E/S à la lecture du contenu d'une page");
             }
+
+            return frames.get(indexOldestDate).getContent();
+
+        } else {
+            throw new SGBDException("erreur sur l'algo de LRU");
         }
-        //throw new SGBDException("Impossible de trouver ou charger le buffer (BufferManager.getPage())");
     }
 
-    /** Liberer une page
-     * @param indexFrame l'index de la frame qui contient la page a virer
-     * @param iIsDirty TRUE pour change FALSE pour inchange
-     */
-    private void freeFrame(int indexFrame, boolean iIsDirty) throws SGBDException {
-        if(iIsDirty){
-            try {
-                DiskManager.getInstance().writePage(frames.get(indexFrame).getPageId(), frames.get(indexFrame).getContent());
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new SGBDException("Erreur d'I/O dans la methode .writePage() de DiskManager");
-            }
-        }
-        frames.get(indexFrame).setPin_count(0);
-        frames.get(indexFrame).setPageId(null);
-        frames.get(indexFrame).setContent(ByteBuffer.allocateDirect(Constantes.pageSize));
-        frames.get(indexFrame).setDirty(false);
-    }
 
     /** Liberer toutes les pages du tableau de frames
      */
     public void flushAll() throws SGBDException {
-        for (int i = 0; i<frames.size(); i++){
-            freePage(frames.get(i).getPageId(), frames.get(i).isDirty());
+        for(Frame frame: frames){
+            if(frame.getPageId() != null){
+                frame.setPin_count(0);
+            }
         }
     }
 
@@ -158,16 +170,10 @@ public class BufferManager {
      * @param iIsDirty TRUE pour change FALSE pour inchange
      */
     public void freePage(PageId pageId, boolean iIsDirty) throws SGBDException {
-        for(int i = 0; i<frames.size(); i++){
-            if(frames.get(i).getPageId() == null) {
-                // si on est sur une frame vide, on passe
-            } else if(frames.get(i).getPageId().getPageIdx() == pageId.getPageIdx() && frames.get(i).getPageId().getFileIdx() == pageId.getFileIdx()) {
-                if (frames.get(i).getPin_count() > 0) { // Si pin_count est superieur a 0, on le decremente
-                    frames.get(i).setPin_count(frames.get(i).getPin_count() - 1);
-                } else if(frames.get(i).getPin_count() == 0){
-                    throw new SGBDException("Le pin_count de la " + i + "e frame doit etre décrémenté alors qu'il est déjà nul");
-                }
-                frames.get(i).setDirty(iIsDirty);
+        for(Frame frame: frames){
+            if((frame.getPageId() != null) && (frame.getPageId().getPageIdx() == pageId.getPageIdx()) && (frame.getPageId().getFileIdx() == pageId.getFileIdx())){
+                frame.addDirty(iIsDirty);
+                frame.decrementerPinCount();
             }
         }
     }
