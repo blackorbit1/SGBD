@@ -73,13 +73,13 @@ public class DiskManager {
 			// long position = ((rf.length() / Constantes.pageSize);
 
 			// seek permet de connaitre la derniere position du fichier
+			oPageId.setPageIdx((int) (rf.length() / Constantes.pageSize));
 			rf.seek(rf.length());
 
 			// On ecrit le contenu du buffer
 			rf.write(bf.array());
-
 			oPageId.setFileIdx(iFileIdx);
-			oPageId.setPageIdx((int) (rf.length() / Constantes.pageSize));
+			rf.close();
 		}
 
 	}
@@ -88,7 +88,6 @@ public class DiskManager {
 	 * Permet de lire une page (input)
 	 * 
 	 * @param iPageId
-	 * @param oBuffer
 	 * @throws IOException
 	 */
 	public void readPage(PageId iPageId, ByteBuffer iBuffer) throws IOException {
@@ -96,12 +95,14 @@ public class DiskManager {
 				Constantes.pathName + "Data_" + iPageId.getFileIdx() + ".rf", "r")) {
 
 			FileChannel fc = readFile.getChannel();
+			//fc.isOpen();
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
 			iBuffer.clear();
 			fc.read(iBuffer);
 
 			fc.close();
+			readFile.close();
 		}
 
 	}
@@ -116,17 +117,15 @@ public class DiskManager {
 	public void writePage(PageId iPageId, ByteBuffer oBuffer) throws IOException {
 		// On recupere le fichier qui contient la page qu'on veut modifier
 
-		try (RandomAccessFile writeFile = new RandomAccessFile(Constantes.pathName + iPageId.getFileIdx() + ".rf",
-				"rw")) {
-
+		try (RandomAccessFile writeFile = new RandomAccessFile(Constantes.pathName + "Data_" + iPageId.getFileIdx() + ".rf", "rw")) {
 			FileChannel fc = writeFile.getChannel();
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
 			oBuffer.flip();
-
-			while (oBuffer.hasRemaining()) {
+			while(oBuffer.hasRemaining()){
 				fc.write(oBuffer);
 			}
+			fc.write(oBuffer);
 			fc.close();
 		}
 	}
