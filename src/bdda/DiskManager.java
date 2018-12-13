@@ -58,19 +58,6 @@ public class DiskManager {
 			}
 
 			ByteBuffer bf = ByteBuffer.wrap(tab);
-			// On stocke le numero de la page dans le buffer ( les 4 premiers octets de la
-			// page)
-
-			// bf.putInt(0, oPageId.getPageIdx());
-			// On a la taille entiere de la page en bytes avec length
-			// On sait que une page vaut 4ko donc on divise le tout par 4ko et on trouve le
-			// nombre de page
-			// Exemple si ya que 3 pages de 4ko alors faut ecrire la nouvelle page a la
-			// position 3
-			// Autre exemple si dans la page y'a rien on a 0/4ko => 0 donc on met direct la
-			// nouvelle page
-			// a la postion 0
-			// long position = ((rf.length() / Constantes.pageSize);
 
 			// seek permet de connaitre la derniere position du fichier
 			oPageId.setPageIdx((int) (rf.length() / Constantes.pageSize));
@@ -95,12 +82,10 @@ public class DiskManager {
 				Constantes.pathName + "Data_" + iPageId.getFileIdx() + ".rf", "r")) {
 
 			FileChannel fc = readFile.getChannel();
-			//fc.isOpen();
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
 			iBuffer.clear();
 			fc.read(iBuffer);
-
 			fc.close();
 			readFile.close();
 		}
@@ -117,16 +102,15 @@ public class DiskManager {
 	public void writePage(PageId iPageId, ByteBuffer oBuffer) throws IOException {
 		// On recupere le fichier qui contient la page qu'on veut modifier
 
-		try (RandomAccessFile writeFile = new RandomAccessFile(Constantes.pathName + "Data_" + iPageId.getFileIdx() + ".rf", "rw")) {
+		try (RandomAccessFile writeFile = new RandomAccessFile(
+				Constantes.pathName + "Data_" + iPageId.getFileIdx() + ".rf", "rw")) {
 			FileChannel fc = writeFile.getChannel();
 			long position = iPageId.getPageIdx() * Constantes.pageSize;
 			fc.position(position);
 			oBuffer.flip();
-			while(oBuffer.hasRemaining()){
-				fc.write(oBuffer);
-			}
 			fc.write(oBuffer);
 			fc.close();
+			writeFile.close();
 		}
 	}
 

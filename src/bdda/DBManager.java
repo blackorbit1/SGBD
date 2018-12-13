@@ -57,9 +57,9 @@ public class DBManager {
 				typesDesColonnes.add(st.nextToken());
 			}
 
-			//System.out.println(nomRelation);
-			//System.out.println(nombreColonnes);
-			//System.out.println(typesDesColonnes);
+			// System.out.println(nomRelation);
+			// System.out.println(nombreColonnes);
+			// System.out.println(typesDesColonnes);
 			createRelation(nomRelation, nombreColonnes, typesDesColonnes);
 			break;
 		case "insert":
@@ -103,24 +103,24 @@ public class DBManager {
 				}
 				break;
 			case "framelist": /// /// commande pour afficher la liste des frames /// ///
-			    ArrayList<Frame> liste = BufferManager.getInstance().getFrames();
-			    for(int i=0; i<liste.size(); i++){
-			        try{
-                        System.out.println("--- --- ---");
-                        System.out.println("Pointeur Frame  : " + liste.get(i).toString());
-                        System.out.println("Pointeur PageId : " + liste.get(i).getPageId().toString());
-                        System.out.println("Page Idx        : " + liste.get(i).getPageId().getPageIdx());
-                        System.out.println("pin_count       : " + liste.get(i).getPin_count());
-                        System.out.println("date unpinned   : " + liste.get(i).getUnpinned().getTime());
-                        System.out.println("isDirty         : " + liste.get(i).isDirty());
-                        System.out.println("content         : " + liste.get(i).getContent().getInt());
-                        System.out.println("--- --- ---");
+				ArrayList<Frame> liste = BufferManager.getInstance().getFrames();
+				for (int i = 0; i < liste.size(); i++) {
+					try {
+						System.out.println("--- --- ---");
+						System.out.println("Pointeur Frame  : " + liste.get(i).toString());
+						System.out.println("Pointeur PageId : " + liste.get(i).getPageId().toString());
+						System.out.println("Page Idx        : " + liste.get(i).getPageId().getPageIdx());
+						System.out.println("pin_count       : " + liste.get(i).getPin_count());
+						System.out.println("date unpinned   : " + liste.get(i).getUnpinned().getTime());
+						System.out.println("isDirty         : " + liste.get(i).isDirty());
+						System.out.println("content         : " + liste.get(i).getContent().getInt());
+						System.out.println("--- --- ---");
 
-                    } catch(Exception e){
-                        System.out.println("probleme lors de l'affichage d'une frame");
-                    }
-                }
-                break;
+					} catch (Exception e) {
+						System.out.println("probleme lors de l'affichage d'une frame");
+					}
+				}
+				break;
 			default:
 				break;
 			}
@@ -149,8 +149,7 @@ public class DBManager {
 	/**
 	 * methode privee pour afficher proprement une liste de records
 	 *
-	 * @param listeRecords
-	 *            (la liste des records)
+	 * @param listeRecords (la liste des records)
 	 */
 	private void affichageRecords(ArrayList<Record> listeRecords) {
 		int nbRecords = 0;
@@ -169,12 +168,9 @@ public class DBManager {
 	 * methode qui affiche tous les tuples dont la valeur de la colonne
 	 * n°indexColonne est egale a valeurColonne
 	 *
-	 * @param nomRelation
-	 *            (nom de la relation)
-	 * @param indexColonne
-	 *            (numero de la colonne qu on veut filtrer)
-	 * @param string
-	 *            (valeur du filtre)
+	 * @param nomRelation  (nom de la relation)
+	 * @param indexColonne (numero de la colonne qu on veut filtrer)
+	 * @param string       (valeur du filtre)
 	 * @throws SGBDException
 	 * @throws ReqException
 	 */
@@ -188,8 +184,7 @@ public class DBManager {
 	 * methode qui affiche tous les tuples d'une relation puis le nb le tuples
 	 * affiches
 	 *
-	 * @param nomRelation
-	 *            (nom de la relation)
+	 * @param nomRelation (nom de la relation)
 	 */
 	public void selectAll(String nomRelation) throws SGBDException {
 		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecords(nomRelation);
@@ -199,10 +194,8 @@ public class DBManager {
 	/**
 	 * methode pour insérer des tuples dans une relation à partir d'un fichier
 	 *
-	 * @param nomRelation
-	 *            (le nom de la relation)
-	 * @param nomFichier
-	 *            (nom du fichier contenant les tuples)
+	 * @param nomRelation (le nom de la relation)
+	 * @param nomFichier  (nom du fichier contenant les tuples)
 	 * @throws SGBDException
 	 */
 	public void fill(String nomRelation, String nomFichier) throws SGBDException {
@@ -210,7 +203,7 @@ public class DBManager {
 		if (!fichier.exists()) {
 			throw new SGBDException("le fichier que vous demandez n'existe pas");
 		}
-		try (   FileInputStream is = new FileInputStream(fichier);
+		try (FileInputStream is = new FileInputStream(fichier);
 				InputStreamReader isr = new InputStreamReader(is, "UTF-8")) {
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < fichier.length(); i++) {
@@ -238,10 +231,8 @@ public class DBManager {
 	/**
 	 * la fonction pour inserer un tuple dans une relation
 	 *
-	 * @param nomRelation
-	 *            (nom de la relation)
-	 * @param contenuDesColonnes
-	 *            (contenu du tuple)
+	 * @param nomRelation        (nom de la relation)
+	 * @param contenuDesColonnes (contenu du tuple)
 	 */
 	public void insertRecord(String nomRelation, ArrayList<String> contenuDesColonnes) throws SGBDException {
 		Record record = new Record();
@@ -253,48 +244,22 @@ public class DBManager {
 	/**
 	 * la fonction pour creer la relation
 	 * 
-	 * @param nomRelation
-	 *            (nom de la relation)
-	 * @param nombreColonnes
-	 *            (le nombre de colonnes)
-	 * @param typesDesColonnes
-	 *            (un tableau avec le types de chaque colonnes)
+	 * @param nomRelation      (nom de la relation)
+	 * @param nombreColonnes   (le nombre de colonnes)
+	 * @param typesDesColonnes (un tableau avec le types de chaque colonnes)
 	 */
 	public void createRelation(String nomRelation, int nombreColonnes, ArrayList<String> typesDesColonnes)
 			throws ReqException {
 
 		int recordSize = 0;
 		for (int i = 0; i < typesDesColonnes.size(); i++) {
-			switch (typesDesColonnes.get(i)) {
-			case "int":
+			if (typesDesColonnes.get(i).equals("int")) {
 				recordSize += Constantes.recordSize_int;
-				break;
-			case "float":
+			} else if (typesDesColonnes.get(i).equals("float")) {
 				recordSize += Constantes.recordSize_float;
-				break;
-			default:
-				if (typesDesColonnes.get(i).substring(0, 5).equals("string")) {
-					try {
-						int nb_chiffres = 0; // compteur qui va compter le nombre de chiffres dans le nombre
-						for (int j = 0; j < 4; j++) {
-							try {
-								Integer.parseInt(typesDesColonnes.get(i).substring(6 + j));
-								nb_chiffres++;
-							} catch (Exception e) {
-								// rien a faire, ça veut juste dire qu'il n'y a pas plus de 3 chiffres dans x
-							}
-						}
-						int x = Integer.parseInt(typesDesColonnes.get(i).substring(6, 6 + nb_chiffres));
-						if (x <= 1000 && x > 0) {
-							recordSize += x * Constantes.recordSize_stringx;
-						} else {
-							throw new ReqException(
-									"La taille d'une colonne de type string est incorrecte (min: 1, max: 1000)");
-						}
-					} catch (Exception e) {
-						throw new ReqException("Une colonne de type string est mal declaree");
-					}
-				}
+			} else if (typesDesColonnes.get(i).substring(0, 6).equals("string")) {
+				int x = Integer.parseInt(typesDesColonnes.get(i).substring(6));
+				recordSize += x * Constantes.recordSize_stringx;
 			}
 		}
 		if (Constantes.pageSize / recordSize == 0) {

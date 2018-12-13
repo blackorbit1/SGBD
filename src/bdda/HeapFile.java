@@ -58,7 +58,6 @@ public class HeapFile {
 	private void getFreePageId(PageId oPageId) throws SGBDException {
 		oPageId.setFileIdx(pointeur.getFileIdx());
 		try {
-			System.out.println("");
 			PageId headerpage = new PageId(pointeur.getFileIdx(), 0);
 			ByteBuffer bufferHeaderPage = BufferManager.getInstance().getPage(headerpage);
 			HeaderPageInfo headerPageI = new HeaderPageInfo();
@@ -78,7 +77,8 @@ public class HeapFile {
 				PageId newpid = new PageId();
 				DiskManager.getInstance().addPage(pointeur.getFileIdx(), newpid);
 				oPageId.setPageIdx(newpid.getPageIdx());
-				headerPageI.addDataPage(new DataPage(oPageId.getPageIdx(), pointeur.getSlotCount()));
+				headerPageI.addDataPage(new DataPage(oPageId.getPageIdx(),
+						(Constantes.pageSize - pointeur.getSlotCount()) / pointeur.getRecordSize()));
 
 				headerPageI.writeToBuffer(bufferHeaderPage);
 				BufferManager.getInstance().freePage(headerpage, true);
@@ -104,8 +104,7 @@ public class HeapFile {
 	 * actualise les informations dans la Header Page suite a l’occupation d’une des
 	 * cases disponible sur une page
 	 * 
-	 * @param iPageId
-	 *            de la page a modifier
+	 * @param iPageId de la page a modifier
 	 * @throws SGBDException
 	 */
 	private void updateHeaderWithTakenSlot(PageId iPageId) throws SGBDException {
@@ -152,16 +151,15 @@ public class HeapFile {
 
 		long positionDebutByteMap = pointeur.getSlotCount();
 		ioBuffer.position(pointeur.getSlotCount() + (iSlotIdx * pointeur.getRecordSize()));
-
 		for (int i = 0; i < iRecord.getValues().size(); i++) {
 			String valeur = iRecord.getValues().get(i);
 			String type = pointeur.getType().get(i);
-
 			if (type.equals("int")) {
 				ioBuffer.putInt(Integer.parseInt(valeur));
+
 			} else if (type.equals("float")) {
 				ioBuffer.putFloat(Float.parseFloat(valeur));
-			} else if (type.equals("string")) {
+			} else if (type.substring(0, 6).equals("string")) {
 				int taille = Integer.parseInt(type.substring(6));
 				for (int j = 0; j < taille; j++) {
 					ioBuffer.putChar(valeur.charAt(j));
@@ -230,7 +228,7 @@ public class HeapFile {
 				record.addValue(Integer.toString(iBuffer.getInt()));
 			} else if (type.equals("float")) {
 				record.addValue(Float.toString(iBuffer.getFloat()));
-			} else if (type.equals("string")) {
+			} else if (type.substring(0, 6).equals("string")) {
 				int taille = Integer.parseInt(type.substring(6));
 				StringBuilder sb = new StringBuilder();
 				for (int j = 0; j < taille; j++) {
@@ -250,13 +248,14 @@ public class HeapFile {
 		ArrayList<Record> listRecord = new ArrayList<Record>();
 		try {
 			ByteBuffer bfPage = BufferManager.getInstance().getPage(iPageId);
-			bfPage.position(0);
+			bfPage.rewind();
 			for (int i = 0; i < pointeur.getSlotCount(); i++) {
 				if (bfPage.get(i) == 1) {
 					listRecord.add(readRecordFromBuffer(bfPage, i));
 				}
 			}
 			BufferManager.getInstance().freePage(iPageId, false);
+
 			return listRecord;
 		} catch (SGBDException e) {
 			e.printStackTrace();
@@ -299,10 +298,11 @@ public class HeapFile {
 		PageId pid = new PageId();
 		try {
 			getFreePageId(pid);
+
 			return insertRecordInPage(iRecord, pid);
 
 		} catch (SGBDException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		return null;
 
