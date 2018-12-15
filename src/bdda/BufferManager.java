@@ -44,6 +44,7 @@ public class BufferManager {
     public ByteBuffer getPage(PageId iPageId) throws SGBDException {
         // on regarde si la page recherchee n'est pas déjà dans le tableau de frames
         for(Frame frame: frames) {
+            // Si on trouve une page avec le meme pageID et fileID
             if((frame.getPageId() != null) && (frame.getPageId().getPageIdx() == iPageId.getPageIdx()) && (frame.getPageId().getFileIdx() == iPageId.getFileIdx())){
                 frame.incrementerPinCount();
                 return frame.getContent();
@@ -53,93 +54,66 @@ public class BufferManager {
         // si non, on cherche la page dans les fichiers et on la met dans le tableau
         // si il reste de la place
         for(Frame frame: frames){
+            // Si la frame sur laquelle on se trouve est libre
             if(frame.getPageId() == null){
+                // On remplis la frame
                 frame.setPageId(iPageId);
                 frame.incrementerPinCount();
                 try {
                     DiskManager.getInstance().readPage(iPageId, frame.getContent());
                 } catch (IOException e) {
                     e.printStackTrace();
-                    throw new SGBDException("erreur d'E/S à la lecture du contenu d'une page");
                 }
+
                 return frame.getContent();
             }
         }
 
 
 
-        // s'il n'en reste pas, LRU
+        // s'il n'en reste pas, on execute le LRU pour savoir quelle page remplacer
+        // initialisation de la position de la page à remplacer
         int indexOldestDate = -1;
+        // initialisation de la date de la page la plus récente
+        // ==> Oui là ça correspond à aucune page mais c'est pour que n'importe quelle page soit plus vielle que cette date
+        // ==> Oui c'est bien la consigne qui demande qu'on utilise la date
+        // ==> La prof a regardé au TD5 elle a dit OK, puis au TD6 et elle aussi dit OK
         Date oldestDate = new Date();
-        /*
-        System.out.println("--- --- ---");
-        System.out.println("Demandé:");
-        System.out.println("FileID : " + iPageId.getFileIdx());
-        System.out.println("PageID : " + iPageId.getPageIdx());
-        System.out.println("--- --- ---");
-        */
+
+        // On parcourt le tableau des frames
         for(int i = 0; i<frames.size(); i++){
-            /*
-            System.out.println("FileID : " + frames.get(i).getPageId().getFileIdx());
-            System.out.println("PageID : " + frames.get(i).getPageId().getPageIdx());
-            System.out.println("pin_count : " + frames.get(i).getPin_count());
-            System.out.println("unpinned frame dans le tableau: " + frames.get(i).getUnpinned().getTime());
-            System.out.println("oldest date: " + oldestDate.getTime());
-            */
+            // Si la frame n'est pas en cours d'utilisation (pin_count == 0)
+            //   ET que soit elle est la première a avoir été visitée, soit parmis toutes les pages qui ont déjà été visitées, elle est celle dont la date à laquelle elle a fini d'etre utilisée est la plus ancienne
+            // ==> Oui la prof a regardé et a dit OK
             if((frames.get(i).getPin_count() == 0) && ((indexOldestDate == -1) || (frames.get(i).getUnpinned().getTime() < oldestDate.getTime()))){
+                // on memorise la position de cette page
                 indexOldestDate = i;
+                // on memorise la date à laquelle elle a fini d'etre utilisée
                 oldestDate = frames.get(i).getUnpinned();
             }
-            /*
-            System.out.println("--- --- ---");
-            */
         }
 
-        /*
-        int indexOldestDate = -1;
-        boolean fin = false;
-        while(true) {
-            for (int i = 0; i < Constantes.frameCount; i++) {
-                if ((this.frames.get(i).getPin_count() == 0) && (this.frames.get(i).getRef_bit() == 1)) {
-                    this.frames.get(i).setRef_bit(0);
-                    this.frames.get(i).setRef_bit(0);
-                    this.frames.get(i).setRef_bit(0);
-                    this.frames.get(i).setRef_bit(0);
-                    this.frames.get(i).setRef_bit(0);
-                    this.frames.get(i).setRef_bit(0);
-                    frames.get(i).ref_bit = 0;
-                    frames.get(i).ref_bit = 0;
-                    frames.get(i).ref_bit = 0;
-                    frames.get(i).ref_bit = 0;
-                    //System.out.println(this.frames.get(i).getRef_bit());
-                } else if ((this.frames.get(i).getPin_count() == 0) && (this.frames.get(i).getRef_bit() == 0)) {
-                    indexOldestDate = i;
-                    fin = true;
-                    break;
-                } else {
-                    System.out.println("enorme erreur");
-                }
-            }
-            if(fin) break;
-            //break;
-        }
-        */
 
-
-
+        // Si il reste de la place
         if(indexOldestDate >= 0){
+            // Si il faut enregistrer des modifications dans la page
             if(frames.get(indexOldestDate).isDirty()){
                 try {
                     DiskManager.getInstance().writePage(frames.get(indexOldestDate).getPageId(), frames.get(indexOldestDate).getContent());
+                    //System.out.println("ecriture page n°" + frames.get(indexOldestDate).getPageId().getPageIdx());
                 } catch (IOException e) {
                     e.printStackTrace();
                     throw new SGBDException("erreur d'E/S à l'ecriture d'une page");
                 }
             }
 
+            // on reset la frame à 0
             frames.get(indexOldestDate).resetFrame();
+
+            // On installe la nouvelle page dans la frame
             frames.get(indexOldestDate).setPageId(iPageId);
             frames.get(indexOldestDate).incrementerPinCount();
+            // On extrait le contenu de la page
             try {
                 DiskManager.getInstance().readPage(iPageId, frames.get(indexOldestDate).getContent());
             } catch (IOException e) {
@@ -149,8 +123,18 @@ public class BufferManager {
 
             return frames.get(indexOldestDate).getContent();
 
-        } else {
-            throw new SGBDException("erreur sur l'algo de LRU");
+        } else { // Traitement d'erreur
+            // On va regarder si le problème vient de l'algo LRU qui n'arriverait pas à trouver de page à supp alors qu'il y en a
+            // ou si c'est une autre classe qui utilise mal le BufferManager
+            int nb_pages_utilisees = 0;
+            for(Frame frame: frames){
+                if(frame.getPin_count() > 0) nb_pages_utilisees++;
+            }
+            if(nb_pages_utilisees >= Constantes.frameCount){
+                throw new SGBDException("Il y a trop de getPage et pas assez de freePage");
+            } else {
+                throw new SGBDException("erreur sur l'algo de LRU");
+            }
         }
     }
 
@@ -160,6 +144,7 @@ public class BufferManager {
     public void flushAll() throws SGBDException {
         for(Frame frame: frames){
             if(frame.getPageId() != null){
+                frame.setDirty(false);
                 frame.setPin_count(0);
             }
         }
@@ -172,6 +157,7 @@ public class BufferManager {
     public void freePage(PageId pageId, boolean iIsDirty) throws SGBDException {
         for(Frame frame: frames){
             if((frame.getPageId() != null) && (frame.getPageId().getPageIdx() == pageId.getPageIdx()) && (frame.getPageId().getFileIdx() == pageId.getFileIdx())){
+                // si la page n'est pas encore dirty elle le devient, sinon elle le reste
                 frame.addDirty(iIsDirty);
                 frame.decrementerPinCount();
             }

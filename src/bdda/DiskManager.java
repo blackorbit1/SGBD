@@ -109,6 +109,13 @@ public class DiskManager {
 			fc.position(position);
 			oBuffer.flip();
 			fc.write(oBuffer);
+
+			/*
+			while(oBuffer.hasRemaining()){
+				fc.write(oBuffer);
+			}
+			*/
+
 			fc.close();
 			writeFile.close();
 		}

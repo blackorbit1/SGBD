@@ -8,14 +8,16 @@ import exception.ReqException;
 import exception.SGBDException;
 
 public class HeapFile {
-	private RelDef pointeur;
+	private RelDef relation;
+	// TODO peut etre qu'il faut mettre un une liste avec toutes les pages (fichiers) associés à cette relation
+	// TODO puis mette ce numl de page en pararmetre de createNewOnDisk()
 
 	public RelDef getPointeur() {
-		return pointeur;
+		return relation;
 	}
 
-	public void setPointeur(RelDef pointeur) {
-		this.pointeur = pointeur;
+	public void setPointeur(RelDef relation) {
+		this.relation = relation;
 	}
 
 	/**
@@ -26,16 +28,16 @@ public class HeapFile {
 	 * @throws IOException
 	 */
 	public void createNewOnDisk() throws IOException, ReqException, SGBDException {
-		// On creer un nouveau fichier qui correspond a l'id donner par le pointeur(qui
+		// On creer un nouveau fichier qui correspond a l'id donner par le relation(qui
 		// correspond la relation concerne)
 		try {
-			DiskManager.getInstance().createFile(pointeur.getFileIdx());
-			PageId newHeaderPage = new PageId(pointeur.getFileIdx(), 0);
+			DiskManager.getInstance().createFile(relation.getFileIdx());
+			PageId newHeaderPage = new PageId(relation.getFileIdx(), 0);
 			// Pour ajouter une page on a besoin d'une nouvelle page qui correspond a la
 			// HeaderPage
 			// l'identifiant de la headerpage sera toujours 0 car il s'agit
 			// de la premiere page du fichier
-			DiskManager.getInstance().addPage(pointeur.getFileIdx(), newHeaderPage);
+			DiskManager.getInstance().addPage(relation.getFileIdx(), newHeaderPage);
 			ByteBuffer bufferNewHeaderPage = BufferManager.getInstance().getPage(newHeaderPage);
 			HeaderPageInfo headerPageInfo = new HeaderPageInfo();
 			headerPageInfo.setDataPageCount(0);
@@ -56,12 +58,13 @@ public class HeapFile {
 	 * informations de la Header Page.
 	 */
 	private void getFreePageId(PageId oPageId) throws SGBDException {
-		oPageId.setFileIdx(pointeur.getFileIdx());
+		oPageId.setFileIdx(relation.getFileIdx());
 		try {
-			PageId headerpage = new PageId(pointeur.getFileIdx(), 0);
+			PageId headerpage = new PageId(relation.getFileIdx(), 0);
 			ByteBuffer bufferHeaderPage = BufferManager.getInstance().getPage(headerpage);
 			HeaderPageInfo headerPageI = new HeaderPageInfo();
 			headerPageI.readFromBuffer(bufferHeaderPage);
+			//System.out.println(headerPageI.getListePages().size() + " " + headerPageI.getDataPageCount());
 
 			boolean slotDisponible = false;
 			for (DataPage d : headerPageI.getListePages()) {
@@ -75,10 +78,18 @@ public class HeapFile {
 			if (!(slotDisponible)) {
 
 				PageId newpid = new PageId();
-				DiskManager.getInstance().addPage(pointeur.getFileIdx(), newpid);
+				DiskManager.getInstance().addPage(relation.getFileIdx(), newpid);
 				oPageId.setPageIdx(newpid.getPageIdx());
-				headerPageI.addDataPage(new DataPage(oPageId.getPageIdx(),
-						(Constantes.pageSize - pointeur.getSlotCount()) / pointeur.getRecordSize()));
+				/*
+				System.out.println("SlotCount : " + relation.getSlotCount());
+				System.out.println("RecordSize : " + relation.getRecordSize());
+				int nbSlotsLibres = Constantes.pageSize / relation.getRecordSize();
+				nbSlotsLibres = Constantes.pageSize - nbSlotsLibres;
+				nbSlotsLibres = nbSlotsLibres / relation.getRecordSize();
+				System.out.println("nbSlotsLibres : " + nbSlotsLibres);
+				*/
+				//System.out.println("nbSlotLibres : " + (Constantes.pageSize - relation.getSlotCount()) / relation.getRecordSize());
+				headerPageI.addDataPage(new DataPage(oPageId.getPageIdx(), /*nbSlotsLibres*/ (Constantes.pageSize - relation.getSlotCount()) / relation.getRecordSize()));
 
 				headerPageI.writeToBuffer(bufferHeaderPage);
 				BufferManager.getInstance().freePage(headerpage, true);
@@ -88,7 +99,7 @@ public class HeapFile {
 				// Ecrire une sequence de 0 au debut de la page (bytemap) pour signifier que
 				// toutes les cases sont vides
 				nouvellePage.position(0);
-				for (int i = 0; i < pointeur.getSlotCount(); i++) {
+				for (int i = 0; i < relation.getSlotCount(); i++) {
 					nouvellePage.put((byte) 0);
 				}
 
@@ -109,7 +120,7 @@ public class HeapFile {
 	 */
 	private void updateHeaderWithTakenSlot(PageId iPageId) throws SGBDException {
 
-		PageId headerPage = new PageId(pointeur.getFileIdx(), 0);
+		PageId headerPage = new PageId(relation.getFileIdx(), 0);
 		try {
 			ByteBuffer bufferHeaderPage = BufferManager.getInstance().getPage(headerPage);
 			HeaderPageInfo hpi = new HeaderPageInfo();
@@ -127,9 +138,12 @@ public class HeapFile {
 			if (pageTrouver) {
 				hpi.writeToBuffer(bufferHeaderPage);
 				BufferManager.getInstance().freePage(headerPage, true);
+			} else {
+				throw new SGBDException("La page n'a pas été trouvée (il va manquer un appel à freePage dans le BufferManager)");
 			}
 
 		} catch (SGBDException e) {
+			e.printStackTrace();
 			throw new SGBDException("Erreur d'I/O lors de la creation d'une page (HeapFile)");
 		}
 
@@ -149,14 +163,13 @@ public class HeapFile {
 	 */
 	private void writeRecordInBuffer(Record iRecord, ByteBuffer ioBuffer, int iSlotIdx) {
 
-		long positionDebutByteMap = pointeur.getSlotCount();
-		ioBuffer.position(pointeur.getSlotCount() + (iSlotIdx * pointeur.getRecordSize()));
+		long positionDebutByteMap = relation.getSlotCount();
+		ioBuffer.position(relation.getSlotCount() + (iSlotIdx * relation.getRecordSize()));
 		for (int i = 0; i < iRecord.getValues().size(); i++) {
 			String valeur = iRecord.getValues().get(i);
-			String type = pointeur.getType().get(i);
+			String type = relation.getType().get(i);
 			if (type.equals("int")) {
 				ioBuffer.putInt(Integer.parseInt(valeur));
-
 			} else if (type.equals("float")) {
 				ioBuffer.putFloat(Float.parseFloat(valeur));
 			} else if (type.substring(0, 6).equals("string")) {
@@ -191,16 +204,17 @@ public class HeapFile {
 			ByteBuffer bufferPage = BufferManager.getInstance().getPage(iPageId);
 			bufferPage.position(0);
 			int slotId = 0;
-			for (int i = 0; i < pointeur.getSlotCount(); i++) {
+			for (int i = 0; i < relation.getSlotCount(); i++) {
 				// TODO Modification ici
 				if (bufferPage.get(i) == 0) {
 					slotId = i;
-					writeRecordInBuffer(iRecord, bufferPage, i);
+
 					bufferPage.position(i);
 					// Attention peut être faux byte en int
 					bufferPage.put((byte) 1);
+					writeRecordInBuffer(iRecord, bufferPage, i);
 					// A verifier appel update
-					updateHeaderWithTakenSlot(iPageId);
+					//updateHeaderWithTakenSlot(iPageId);
 
 					break;
 				}
@@ -219,10 +233,10 @@ public class HeapFile {
 
 	public Record readRecordFromBuffer(ByteBuffer iBuffer, int iSlotIdx) {
 		Record record = new Record();
-		iBuffer.position(pointeur.getSlotCount() + (iSlotIdx * pointeur.getRecordSize()));
+		iBuffer.position(relation.getSlotCount() + (iSlotIdx * relation.getRecordSize()));
 
-		for (int i = 0; i < pointeur.getNbColonne(); i++) {
-			String type = pointeur.getType().get(i);
+		for (int i = 0; i < relation.getNbColonne(); i++) {
+			String type = relation.getType().get(i);
 
 			if (type.equals("int")) {
 				record.addValue(Integer.toString(iBuffer.getInt()));
@@ -240,6 +254,12 @@ public class HeapFile {
 
 		}
 
+		/*
+		for(String s : record.getValues()){
+			System.out.print(s + " ");
+		}
+		*/
+
 		return record;
 
 	}
@@ -249,12 +269,21 @@ public class HeapFile {
 		try {
 			ByteBuffer bfPage = BufferManager.getInstance().getPage(iPageId);
 			bfPage.rewind();
-			for (int i = 0; i < pointeur.getSlotCount(); i++) {
+
+			/*
+			while(bfPage.hasRemaining()){
+				System.out.print(bfPage.get());
+			}
+			*/
+
+			for (int i = 0; i < relation.getSlotCount(); i++) {
 				if (bfPage.get(i) == 1) {
+					//System.out.println("ok" + i);
 					listRecord.add(readRecordFromBuffer(bfPage, i));
 				}
 			}
 			BufferManager.getInstance().freePage(iPageId, false);
+
 
 			return listRecord;
 		} catch (SGBDException e) {
@@ -268,21 +297,27 @@ public class HeapFile {
 		ArrayList<PageId> listPageId = new ArrayList<PageId>();
 		try {
 
-			PageId headerpage = new PageId(pointeur.getFileIdx(), 0);
+			PageId headerpage = new PageId(relation.getFileIdx(), 0);
 			ByteBuffer bufferHeaderPage;
 			bufferHeaderPage = BufferManager.getInstance().getPage(headerpage);
 			HeaderPageInfo headerPageI = new HeaderPageInfo();
 			headerPageI.readFromBuffer(bufferHeaderPage);
 
 			for (DataPage d : headerPageI.getListePages()) {
-				listPageId.add(new PageId(pointeur.getFileIdx(), d.getPageIdx()));
+				listPageId.add(new PageId(relation.getFileIdx(), d.getPageIdx()));
 			}
+
+			BufferManager.getInstance().freePage(headerpage, false);
+			// TODO on a ajouté un freePage ici
 
 			return listPageId;
 
 		} catch (SGBDException e) {
 			e.printStackTrace();
 		}
+
+
+
 
 		return listPageId;
 
@@ -298,7 +333,7 @@ public class HeapFile {
 		PageId pid = new PageId();
 		try {
 			getFreePageId(pid);
-
+			updateHeaderWithTakenSlot(pid);
 			return insertRecordInPage(iRecord, pid);
 
 		} catch (SGBDException e) {

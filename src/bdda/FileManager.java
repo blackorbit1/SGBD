@@ -2,6 +2,7 @@ package bdda;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 import exception.ReqException;
@@ -17,6 +18,10 @@ public class FileManager {
 
 	public static FileManager getInstance() {
 		return fileManager;
+	}
+
+	public List<HeapFile> getListe() {
+		return listeHeapFiles;
 	}
 
 	public void init() {
@@ -61,7 +66,10 @@ public class FileManager {
 			//System.out.println(listeHeapFiles.get(i).getPointeur().getNom());
 			if (listeHeapFiles.get(i).getPointeur().getNom().equals(iRelationName)) {
 				rid = listeHeapFiles.get(i).insertRecord(iRecord);
-                System.out.println("Insertion dans la relation : " + iRelationName + " ID: "+ rid.getPageId().getFileIdx() +" page  n°: "+ rid.getPageId().getPageIdx() + " slot n°: " + rid.getSlotIdx() );
+
+				//TODO le print de debug qu'on utilisait depuis le début
+                //System.out.println("Insertion dans la relation : " + iRelationName + " ID: "+ rid.getPageId().getFileIdx() +" page  n°: "+ rid.getPageId().getPageIdx() + " slot n°: " + rid.getSlotIdx() );
+
 				found = true;
 			}
 		}
@@ -75,6 +83,7 @@ public class FileManager {
 
 	public ArrayList<Record> getAllRecords(String iRelationName) throws SGBDException {
 		ArrayList<Record> listeDeRecords = new ArrayList<Record>();
+		boolean trouve = false;
 		for (int i = 0; i < listeHeapFiles.size(); i++) {
 			if (listeHeapFiles.get(i).getPointeur().getNom().equals(iRelationName)) {
 				List<PageId> listePageId = new ArrayList<PageId>();
@@ -82,11 +91,15 @@ public class FileManager {
 				for (int j = 0; j < listePageId.size(); j++) {
 					listeDeRecords.addAll(listeHeapFiles.get(i).getRecordsOnPage(listePageId.get(j)));
 				}
-			} else {
-				throw new SGBDException("Relation introuvable dans la liste des HeapFiles");
+				trouve = true;
 			}
 		}
-		return listeDeRecords;
+		if(trouve){
+			return listeDeRecords;
+		} else {
+			throw new SGBDException("Relation introuvable dans la liste des HeapFiles");
+		}
+
 	}
 
 	/**
@@ -98,6 +111,7 @@ public class FileManager {
 	//Mais à quoi correspond le string exactement ?
 	public ArrayList<Record> getAllRecordsWithFilter(String iRelationName, int iIdxCol, String iValeur) throws ReqException, SGBDException {
 		ArrayList<Record> allRecordsFilter = new ArrayList<Record>();
+		boolean trouve = false;
 		for (int i = 0; i < listeHeapFiles.size(); i++) {
 			// On cherche dans les heapfile qui correspond au nom de la relation
 			if (listeHeapFiles.get(i).getPointeur().getNom().equals(iRelationName)) {
@@ -105,40 +119,48 @@ public class FileManager {
 				List<RelDef> listeRelations = DBDef.getInstance().getListeDeRelDef();
 				for (int j = 0; j < listeRelations.size(); j++) {
 					// on regarde ou est ce qu'on a la relation
-					if (listeHeapFiles.get(i).getPointeur() == listeRelations.get(j)) {
-						// on recupere le nombre de colonne de cette relation
-						int nbColonnes = listeRelations.get(j).getNbColonne();
-						ArrayList<String> typeColonne = new ArrayList<String>();
-						// on recupere sa liste de type de colonnes
-						typeColonne = listeRelations.get(j).getType();
-						// on regarde si la valeur de la colonne correspond a la valeur entré en
-						// parametre
-						if (typeColonne.get(iIdxCol) == iValeur) {
-							// si tout est bon alors on ajoute ses records
-							// donc on reprend le mm principe que la fonction de getAllRecords
-							//Mais on cherche a récupérer les records de la colonne concerné
-							List<PageId> listePageId = new ArrayList<PageId>();
-							listePageId = listeHeapFiles.get(i).getDataPagesIds();
-							//On recupere la colonne du record
-							//Je n'ai pas très bien compris à quoi correspondait exactement le String en parametre
-							//Donc pour le moment j'ai fais ca mais c'est vraiment pas sur sur sur suuuuuur
-							for (int k = 0; k < listePageId.size(); k++) {
-								allRecordsFilter.add(listeHeapFiles.get(i).getRecordsOnPage(listePageId.get(k)).get(iIdxCol));
+					if (listeHeapFiles.get(i).getPointeur().getNom() == listeRelations.get(j).getNom()) {
+						List<PageId> listePageId = new ArrayList<PageId>();
+						listePageId = listeHeapFiles.get(i).getDataPagesIds();
+						for (int k = 0; k < listePageId.size(); k++) {
+							ArrayList<Record> tampon = new ArrayList<>();
+							tampon.addAll(listeHeapFiles.get(i).getRecordsOnPage(listePageId.get(k)));
+							for(Record record : tampon){
+								//System.out.println(record.getValues().get(j));
+								if(record.getValues().get(iIdxCol).equals(iValeur)){
+									allRecordsFilter.add(record);
+								}
 							}
 						}
+						trouve = true;
+						/*
 						else {
 							throw new ReqException("La valeur de la colonne ne correspond pas à la valeur attendue");
 						}
+						*/
 					}
+					/*
 					else {
 						throw new SGBDException("La relation est introuvable dans la liste de relations de DBDef");
 					}
+					*/
 				}
 			}
+			/*
 			else {
 				throw new SGBDException("Relation introuvable avec iRelationName dans la liste des HeapFiles");
 			}
+			*/
 		}
-		return allRecordsFilter;
+		if(trouve){
+			return allRecordsFilter;
+		} else {
+			throw new SGBDException("Relation introuvable dans la liste des HeapFiles");
+		}
+		//return allRecordsFilter;
+	}
+
+	public void reset(){
+		listeHeapFiles = new ArrayList<>();
 	}
 }

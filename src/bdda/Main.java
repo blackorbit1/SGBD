@@ -27,9 +27,9 @@ public class Main {
 				}
 				db.afficher();
 			} catch (ReqException e) {
-				System.out.println(e.getMessage());
+				e.printStackTrace();
 			} catch (SGBDException e) {
-				System.out.println(e.getMessage());
+				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

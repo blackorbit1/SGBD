@@ -91,6 +91,9 @@ public class DBManager {
 			}
 			select(nomRelation, indexColonne, st.nextToken());
 			break;
+		case "clean":
+			clean();
+			break;
 		case "debug": /// /// commande de debug poour tester des fonctions du SGBD /// ///
 			switch (st.nextToken()) {
 			case "createfile": /// /// commande qui cree une fichier vide dans le classpath /// ///
@@ -130,6 +133,38 @@ public class DBManager {
 		}
 	}
 
+	private void clean() throws SGBDException {
+		// Suppression de toutes les relations existantes
+		// on fait par rapport au nombre de relation dans la reldef
+		// ou par rapport a la taille de la liste dans fileManager
+		for (int i = 0; i < FileManager.getInstance().getListe().size(); i++) {
+			System.out.println("Data " + i );
+			File fileDelete = new File(Constantes.pathName + "Data_" + i + ".rf");
+
+			System.out.println(fileDelete.exists());
+			if (fileDelete.delete()) {
+				System.out.println("Relation supprimé");
+			} else {
+				System.out.println("Aucune relation supprimé");
+			}
+		}
+
+		// Supppresion du catalogye
+		File fileCatalogue = new File(Constantes.pathName + "Catalog.def");
+		if (fileCatalogue.delete()) {
+			System.out.println("Le fichier Catalog.def a été supprimé");
+		} else {
+			System.out.println("Aucune supression de Catalog.def");
+		}
+
+		// Tout a 0 dans le bufferManager
+		BufferManager.getInstance().flushAll();
+		// Tout a 0 dans le DBDef
+		DBDef.getInstance().reset();
+		// Liste a 0 dans FileManager
+		FileManager.getInstance().reset();
+	}
+
 	/**
 	 * Fonction de debug
 	 */
@@ -156,7 +191,7 @@ public class DBManager {
 		for (int i = 0; i < listeRecords.size(); i++) {
 			ArrayList<String> record = listeRecords.get(i).getValues();
 			for (int j = 0; j < record.size(); j++) {
-				System.out.print(record.get(j) + " ");
+				System.out.print(record.get(j) + " \t");
 			}
 			nbRecords++;
 			System.out.println();
@@ -272,7 +307,7 @@ public class DBManager {
 		relation.setNbColonne(nombreColonnes);
 		relation.setType(typesDesColonnes);
 		relation.setRecordSize(recordSize);
-		relation.setSlotCount(Constantes.pageSize / recordSize);
+		relation.setSlotCount(Constantes.pageSize / recordSize + 1);
 		relation.setFileIdx(dbDef.getCompteurRel());
 
 		dbDef.addRelation(relation);

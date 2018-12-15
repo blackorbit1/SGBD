@@ -86,4 +86,9 @@ public class DBDef {
             throw new SGBDException("Erreur lors de l'ecriture de l'objet DBDef dans le fichier Catalog.def");
         }
     }
+
+    public void reset(){
+		listeDeRelDef = new ArrayList<>();
+		this.compteurRel = 0;
+	}
 }

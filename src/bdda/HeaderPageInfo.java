@@ -59,6 +59,7 @@ public class HeaderPageInfo {
 	 */
 
 	public void writeToBuffer(ByteBuffer buffer) {
+		buffer.clear();
 		buffer.position(0);
 		buffer.putInt(dataPageCount);
 
