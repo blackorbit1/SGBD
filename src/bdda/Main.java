@@ -6,7 +6,7 @@ import exception.ReqException;
 import exception.SGBDException;
 
 public class Main {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SGBDException {
 		DBManager db = DBManager.getInstance();
 		db.init();
 		String commande = "";

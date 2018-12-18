@@ -89,7 +89,9 @@ public class HeapFile {
 				System.out.println("nbSlotsLibres : " + nbSlotsLibres);
 				*/
 				//System.out.println("nbSlotLibres : " + (Constantes.pageSize - relation.getSlotCount()) / relation.getRecordSize());
-				headerPageI.addDataPage(new DataPage(oPageId.getPageIdx(), /*nbSlotsLibres*/ (Constantes.pageSize - relation.getSlotCount()) / relation.getRecordSize()));
+                //System.out.println((Constantes.pageSize - relation.getSlotCount()) / relation.getRecordSize());
+                //System.out.println(relation.getSlotCount());
+				headerPageI.addDataPage(new DataPage(oPageId.getPageIdx(), relation.getSlotCount()));
 
 				headerPageI.writeToBuffer(bufferHeaderPage);
 				BufferManager.getInstance().freePage(headerpage, true);

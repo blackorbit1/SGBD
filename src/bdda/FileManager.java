@@ -1,6 +1,7 @@
 package bdda;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -108,57 +109,56 @@ public class FileManager {
 	 * @throws ReqException 
 	 * @throws SGBDException 
 	 **/
-	//Mais à quoi correspond le string exactement ?
-	public ArrayList<Record> getAllRecordsWithFilter(String iRelationName, int iIdxCol, String iValeur) throws ReqException, SGBDException {
-		ArrayList<Record> allRecordsFilter = new ArrayList<Record>();
-		boolean trouve = false;
-		for (int i = 0; i < listeHeapFiles.size(); i++) {
-			// On cherche dans les heapfile qui correspond au nom de la relation
-			if (listeHeapFiles.get(i).getPointeur().getNom().equals(iRelationName)) {
-				// on recupere tous les rel
-				List<RelDef> listeRelations = DBDef.getInstance().getListeDeRelDef();
-				for (int j = 0; j < listeRelations.size(); j++) {
-					// on regarde ou est ce qu'on a la relation
-					if (listeHeapFiles.get(i).getPointeur().getNom() == listeRelations.get(j).getNom()) {
-						List<PageId> listePageId = new ArrayList<PageId>();
-						listePageId = listeHeapFiles.get(i).getDataPagesIds();
-						for (int k = 0; k < listePageId.size(); k++) {
-							ArrayList<Record> tampon = new ArrayList<>();
-							tampon.addAll(listeHeapFiles.get(i).getRecordsOnPage(listePageId.get(k)));
-							for(Record record : tampon){
-								//System.out.println(record.getValues().get(j));
-								if(record.getValues().get(iIdxCol).equals(iValeur)){
-									allRecordsFilter.add(record);
-								}
-							}
-						}
-						trouve = true;
-						/*
-						else {
-							throw new ReqException("La valeur de la colonne ne correspond pas à la valeur attendue");
-						}
-						*/
-					}
-					/*
-					else {
-						throw new SGBDException("La relation est introuvable dans la liste de relations de DBDef");
-					}
-					*/
-				}
+	public ArrayList<Record> getAllRecordsWithFilter(String iRelationName, int iIdxCol, String iValeur) throws SGBDException {
+		ArrayList<Record> listeAllRecords = getAllRecords(iRelationName);
+		ArrayList<Record> listeFilter = new ArrayList<Record>();
+		for(int i = 0 ; i<listeAllRecords.size();i++) {
+			if(listeAllRecords.get(i).getValues().get(iIdxCol).equals(iValeur)) {
+				listeFilter.add(listeAllRecords.get(i));
 			}
-			/*
-			else {
-				throw new SGBDException("Relation introuvable avec iRelationName dans la liste des HeapFiles");
-			}
-			*/
 		}
-		if(trouve){
-			return allRecordsFilter;
-		} else {
-			throw new SGBDException("Relation introuvable dans la liste des HeapFiles");
-		}
-		//return allRecordsFilter;
+		return listeFilter;
 	}
+
+	public ArrayList<Record> join(String nomRel1, String nomRel2, int indiceCol1, int indiceCol2) throws SGBDException{
+	    HeapFile hfRel1 = null;
+	    HeapFile hfRel2 = null;
+
+	    ArrayList<Record> resultat = new ArrayList<>();
+
+	    for(HeapFile hf : listeHeapFiles){
+	        if(hf.getPointeur().getNom().equals(nomRel1)){
+	            hfRel1 = hf;
+            } else if (hf.getPointeur().getNom().equals(nomRel2)){
+	            hfRel2 = hf;
+            }
+        }
+
+
+	    for(PageId pageRel1 : hfRel1.getDataPagesIds()){
+	        ArrayList<Record> recordsRel1 = hfRel1.getRecordsOnPage(pageRel1);
+	        for(PageId pageRel2 : hfRel2.getDataPagesIds()){
+                ArrayList<Record> recordsRel2 = hfRel2.getRecordsOnPage(pageRel2);
+                for (Record recRel1 : recordsRel1){
+                    for(Record recRel2 : recordsRel2){
+                        if(recRel1.getValues().get(indiceCol1-1).equals(recRel2.getValues().get(indiceCol2-1))){
+                            Record record = new Record();
+                            record.addValue(recRel1.getValues().get(indiceCol1-1));
+                            for (int i = 0; i<recRel1.getValues().size(); i++){
+                                if(i != indiceCol1-1) record.addValue(recRel1.getValues().get(i));
+                            }
+                            for (int i = 0; i<recRel2.getValues().size(); i++){
+                                if(i != indiceCol2-1) record.addValue(recRel2.getValues().get(i));
+                            }
+                            resultat.add(record);
+                        }
+                    }
+                }
+            }
+        }
+
+	    return resultat;
+    }
 
 	public void reset(){
 		listeHeapFiles = new ArrayList<>();

@@ -1,8 +1,9 @@
 package bdda;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class RelDef { // === === Classes pour une relation === ===
+public class RelDef implements Serializable { // === === Classes pour une relation === ===
 	private String nom;				// nom de la relation
 	private int nbColonne;			// nombre de colonnes
 	private ArrayList<String> type;	// type de chaque colonnes

@@ -21,7 +21,8 @@ public class DBManager {
 		return db;
 	}
 
-	public void init() {
+	public void init() throws SGBDException {
+		DBDef.getInstance().init();
 		dbDef = DBDef.getInstance();
 		FileManager.getInstance().init();
 	}
@@ -94,6 +95,13 @@ public class DBManager {
 		case "clean":
 			clean();
 			break;
+        case "join":
+            String nomRel1 = st.nextToken();
+            String nomRel2 = st.nextToken();
+            int indiceCol1 = Integer.parseInt(st.nextToken());
+            int indiceCol2 = Integer.parseInt(st.nextToken());
+            join(nomRel1, nomRel2, indiceCol1, indiceCol2);
+            break;
 		case "debug": /// /// commande de debug poour tester des fonctions du SGBD /// ///
 			switch (st.nextToken()) {
 			case "createfile": /// /// commande qui cree une fichier vide dans le classpath /// ///
@@ -132,6 +140,8 @@ public class DBManager {
 			throw new ReqException("Commande inconnue");
 		}
 	}
+
+
 
 	private void clean() throws SGBDException {
 		// Suppression de toutes les relations existantes
@@ -177,8 +187,10 @@ public class DBManager {
 
 	}
 
-	public void finish() {
-
+	public void finish() throws SGBDException {
+		DBDef.getInstance().finish();
+		// TODO j'ai rajouté ça qui va de paire avec l'ajout de l'ecriture des pages dans flushAll mais à tester encore
+		BufferManager.getInstance().flushAll();
 	}
 
 	/**
@@ -191,7 +203,7 @@ public class DBManager {
 		for (int i = 0; i < listeRecords.size(); i++) {
 			ArrayList<String> record = listeRecords.get(i).getValues();
 			for (int j = 0; j < record.size(); j++) {
-				System.out.print(record.get(j) + " \t");
+				System.out.print(record.get(j) + "\t");
 			}
 			nbRecords++;
 			System.out.println();
@@ -210,8 +222,7 @@ public class DBManager {
 	 * @throws ReqException
 	 */
 	public void select(String nomRelation, int indexColonne, String string) throws SGBDException, ReqException {
-		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecordsWithFilter(nomRelation, indexColonne,
-				string);
+		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecordsWithFilter(nomRelation, ((indexColonne == 0)?0:indexColonne-1), string);
 		affichageRecords(listeRecords);
 	}
 
@@ -225,6 +236,17 @@ public class DBManager {
 		ArrayList<Record> listeRecords = FileManager.getInstance().getAllRecords(nomRelation);
 		affichageRecords(listeRecords);
 	}
+
+    /** methode de jointure
+     *
+     * @param nomRel1
+     * @param nomRel2
+     * @param indiceCol1
+     * @param indiceCol2
+     */
+    public void join(String nomRel1, String nomRel2, int indiceCol1, int indiceCol2) throws SGBDException {
+	    affichageRecords(FileManager.getInstance().join(nomRel1, nomRel2, indiceCol1, indiceCol2));
+    }
 
 	/**
 	 * methode pour insérer des tuples dans une relation à partir d'un fichier
@@ -307,7 +329,7 @@ public class DBManager {
 		relation.setNbColonne(nombreColonnes);
 		relation.setType(typesDesColonnes);
 		relation.setRecordSize(recordSize);
-		relation.setSlotCount(Constantes.pageSize / recordSize + 1);
+		relation.setSlotCount(Constantes.pageSize /(recordSize + 1));
 		relation.setFileIdx(dbDef.getCompteurRel());
 
 		dbDef.addRelation(relation);

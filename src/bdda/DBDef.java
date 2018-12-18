@@ -5,7 +5,7 @@ import exception.SGBDException;
 import java.io.*;
 import java.util.ArrayList;
 
-public class DBDef {
+public class DBDef implements Serializable {
 	private ArrayList<RelDef> listeDeRelDef;
 	private int compteurRel;
 	
@@ -51,6 +51,7 @@ public class DBDef {
 		File fichier = new File(Constantes.pathName + "Catalog.def");
 		try(FileInputStream fis = new FileInputStream(fichier); ObjectInputStream ois = new ObjectInputStream(fis)){
 			dbdef = (DBDef) ois.readObject();
+			System.out.println(dbdef.listeDeRelDef);
 		} catch (FileNotFoundException e) { // si le fichier Catalog.def n'existe pas
 			dbdef = new DBDef(); // on initialise la classe sans rien en plus
 			try {
@@ -72,6 +73,7 @@ public class DBDef {
 	public void finish() throws SGBDException {
         File fichier = new File(Constantes.pathName + "Catalog.def");
         if(!fichier.exists()) { // Si le fichier n'existe pas
+            System.out.println("Le fichier n'existe pas");
             try {
                 fichier.createNewFile();
             } catch (IOException e) {
@@ -83,6 +85,7 @@ public class DBDef {
         } catch (FileNotFoundException e) {
             throw new SGBDException("Impossible de creer un fichier");
         } catch (IOException e) {
+            e.printStackTrace();
             throw new SGBDException("Erreur lors de l'ecriture de l'objet DBDef dans le fichier Catalog.def");
         }
     }
