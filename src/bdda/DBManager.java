@@ -190,7 +190,7 @@ public class DBManager {
 	public void finish() throws SGBDException {
 		DBDef.getInstance().finish();
 		// TODO j'ai rajouté ça qui va de paire avec l'ajout de l'ecriture des pages dans flushAll mais à tester encore
-		BufferManager.getInstance().flushAll();
+		BufferManager.getInstance().saveAll();
 	}
 
 	/**

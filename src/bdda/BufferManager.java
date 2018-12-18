@@ -138,6 +138,18 @@ public class BufferManager {
         }
     }
 
+    public void saveAll() throws SGBDException {
+        for(Frame frame: frames){
+            if(frame.getPageId() != null){
+                try {
+                    DiskManager.getInstance().writePage(frame.getPageId(), frame.getContent());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 
     /** Liberer toutes les pages du tableau de frames
      */
@@ -146,12 +158,6 @@ public class BufferManager {
             if(frame.getPageId() != null){
                 frame.setDirty(false);
                 frame.setPin_count(0);
-                // TODO j'ai mis ça qui devrait etre obligatoire pour la commande exit mais à tester
-                try {
-                    DiskManager.getInstance().writePage(frame.getPageId(), frame.getContent());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }
