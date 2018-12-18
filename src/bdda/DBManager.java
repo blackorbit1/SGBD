@@ -148,23 +148,25 @@ public class DBManager {
 		// on fait par rapport au nombre de relation dans la reldef
 		// ou par rapport a la taille de la liste dans fileManager
 		for (int i = 0; i < FileManager.getInstance().getListe().size(); i++) {
-			System.out.println("Data " + i );
+			//System.out.println("Data " + i );
 			File fileDelete = new File(Constantes.pathName + "Data_" + i + ".rf");
 
-			System.out.println(fileDelete.exists());
+			//System.out.println(fileDelete.exists());
+
 			if (fileDelete.delete()) {
-				System.out.println("Relation supprimé");
+				//System.out.println("Relation supprimé");
 			} else {
-				System.out.println("Aucune relation supprimé");
+				//System.out.println("Aucune relation supprimé");
 			}
+
 		}
 
 		// Supppresion du catalogye
 		File fileCatalogue = new File(Constantes.pathName + "Catalog.def");
 		if (fileCatalogue.delete()) {
-			System.out.println("Le fichier Catalog.def a été supprimé");
+			//System.out.println("Le fichier Catalog.def a été supprimé");
 		} else {
-			System.out.println("Aucune supression de Catalog.def");
+			//System.out.println("Aucune supression de Catalog.def");
 		}
 
 		// Tout a 0 dans le bufferManager

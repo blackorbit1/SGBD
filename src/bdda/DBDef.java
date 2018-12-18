@@ -73,7 +73,7 @@ public class DBDef implements Serializable {
 	public void finish() throws SGBDException {
         File fichier = new File(Constantes.pathName + "Catalog.def");
         if(!fichier.exists()) { // Si le fichier n'existe pas
-            System.out.println("Le fichier n'existe pas");
+            //System.out.println("Le fichier n'existe pas");
             try {
                 fichier.createNewFile();
             } catch (IOException e) {

@@ -129,7 +129,8 @@ public class FileManager {
 	    for(HeapFile hf : listeHeapFiles){
 	        if(hf.getPointeur().getNom().equals(nomRel1)){
 	            hfRel1 = hf;
-            } else if (hf.getPointeur().getNom().equals(nomRel2)){
+	        }
+            if(hf.getPointeur().getNom().equals(nomRel2)){
 	            hfRel2 = hf;
             }
         }
