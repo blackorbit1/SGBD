@@ -161,6 +161,15 @@ public class DBManager {
 
 		}
 
+        // Pour etre sûr que tous les fichiers Data soient bien supprimés
+        for(int i = 0; i<10; i++){
+            if(new File(Constantes.pathName + "Data_" + i + ".rf").exists()){
+                try{
+                    new File(Constantes.pathName + "Data_" + i + ".rf").delete();
+                } catch(Exception e){ /* rien à faire */ }
+            }
+        }
+
 		// Supppresion du catalogye
 		File fileCatalogue = new File(Constantes.pathName + "Catalog.def");
 		if (fileCatalogue.delete()) {
@@ -175,6 +184,8 @@ public class DBManager {
 		DBDef.getInstance().reset();
 		// Liste a 0 dans FileManager
 		FileManager.getInstance().reset();
+
+		System.out.println("> La base de données à bien été remise à 0");
 	}
 
 	/**
@@ -191,7 +202,6 @@ public class DBManager {
 
 	public void finish() throws SGBDException {
 		DBDef.getInstance().finish();
-		// TODO j'ai rajouté ça qui va de paire avec l'ajout de l'ecriture des pages dans flushAll mais à tester encore
 		BufferManager.getInstance().saveAll();
 	}
 
@@ -210,7 +220,7 @@ public class DBManager {
 			nbRecords++;
 			System.out.println();
 		}
-		System.out.println("Total records : " + nbRecords);
+		System.out.println("> Total records : " + nbRecords);
 	}
 
 	/**
@@ -279,6 +289,7 @@ public class DBManager {
 				record.setValues(contenuDesColonnes);
 				FileManager.getInstance().insertRecordInRelation(nomRelation, record);
 			}
+            System.out.println("> Tous les tuples du fichier on bien été insérés");
 		} catch (IOException e) {
 			throw new SGBDException("Impossible de lire le fichier fourni: " + e.getMessage());
 		} catch (Exception e) {
@@ -297,7 +308,7 @@ public class DBManager {
 		Record record = new Record();
 		record.setValues(contenuDesColonnes);
 		FileManager.getInstance().insertRecordInRelation(nomRelation, record);
-
+        System.out.println("> Le tuple a bien été inséré");
 	}
 
 	/**
@@ -337,5 +348,7 @@ public class DBManager {
 		dbDef.addRelation(relation);
 
 		FileManager.getInstance().createNewHeapFile(relation);
+
+        System.out.println("> La relation a bien été créée");
 	}
 }

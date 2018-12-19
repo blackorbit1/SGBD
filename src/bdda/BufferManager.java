@@ -138,6 +138,10 @@ public class BufferManager {
         }
     }
 
+    /** Methode qui sauvegarde toutes les pages qui sont dans le tableau de frame du BufferManager
+     *
+     * @throws SGBDException
+     */
     public void saveAll() throws SGBDException {
         for(Frame frame: frames){
             if(frame.getPageId() != null){
@@ -152,6 +156,8 @@ public class BufferManager {
 
 
     /** Liberer toutes les pages du tableau de frames
+     *
+     * @throws SGBDException
      */
     public void flushAll() throws SGBDException {
         for(Frame frame: frames){

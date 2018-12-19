@@ -60,7 +60,7 @@ public class DBDef implements Serializable {
 				throw new SGBDException("Impossible de creer un fichier");
 			}
 		} catch (IOException e) { // S'il y a une autre erreurr d'I/O
-			throw new SGBDException("Erreur lors de la lecture de l'objet DBDef dans le fichier Catalog.def");
+			throw new SGBDException("Erreur lors de la lecture de l'objet DBDef dans le fichier Catalog.def, il se peut qu'il soit corrompu");
 		} catch (ClassNotFoundException e) {
 			throw new SGBDException("Euh c'est bizarre la, la classe DBDef ne trouve pas la classe DBDef");
 		}
